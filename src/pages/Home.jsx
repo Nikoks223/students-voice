@@ -224,7 +224,7 @@ function TrendingSection({ threads, loading, refresh, onSwitchTab, isAuthenticat
 export default function Home() {
   const { isAuthenticated, userProfile } = useAuth();
   const navigate = useNavigate();
-  const [sort, setSort] = useState('new');
+  const [sort, setSort] = useState('trending');
 
   const { threads, loading, loadingMore, hasMore, error, loadMore } = usePaginatedThreads({
     sortBy: sort,

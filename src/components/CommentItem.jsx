@@ -339,7 +339,7 @@ export default function CommentItem({
             <p className="text-[12.5px] italic mb-2" style={{ color: 'var(--color-muted-dimmer)' }}>
               {comment.isDeleted === 'by_moderator'
                 ? 'Коментарот е отстранет од модератор.'
-                : 'Коментарот е избришан.'}
+                : 'Коментарот е избришан од корисникот.'}
             </p>
           ) : editing ? (
             <div className="mb-2">

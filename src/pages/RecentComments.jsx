@@ -11,6 +11,7 @@ import Avatar from '../components/Avatar';
 import { timeAgo } from '../utils/timeAgo';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
+import ReportModal from '../components/ReportModal';
 
 function renderBody(text) {
   return text.split(/(@\w+)/g).map((part, i) =>
@@ -29,7 +30,7 @@ function renderBody(text) {
   );
 }
 
-function CommentCard({ comment, thread, initiallyVoted }) {
+function CommentCard({ comment, thread, initiallyVoted, onReport }) {
   const requireAuth = useRequireAuth();
   const navigate = useNavigate();
   const { userProfile } = useAuth();
@@ -237,7 +238,15 @@ function CommentCard({ comment, thread, initiallyVoted }) {
           )}
 
           <button
-            onClick={() => requireAuth(() => {})}
+            onClick={() =>
+              requireAuth(() =>
+                onReport({
+                  targetType: 'comment',
+                  targetId: comment.id,
+                  threadId: comment.threadId,
+                }),
+              )
+            }
             className="ml-auto px-2 py-1.5 rounded-lg text-[11px]"
             style={{ color: 'var(--color-muted-dimmer)', transition: 'color 0.18s' }}
             onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-muted)')}
@@ -255,6 +264,7 @@ export default function RecentComments() {
   const { userProfile, isAuthenticated } = useAuth();
   const [comments, setComments] = useState([]);
   const [threadMap, setThreadMap] = useState({});
+  const [reportTarget, setReportTarget] = useState(null);
   const [votedSet, setVotedSet] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -397,6 +407,7 @@ export default function RecentComments() {
                 comment={c}
                 thread={threadMap[c.threadId]}
                 initiallyVoted={votedSet?.has(`comment_${c.id}`)}
+                onReport={setReportTarget}
               />
             ))}
           </div>
@@ -415,6 +426,15 @@ export default function RecentComments() {
             </div>
           )}
         </>
+      )}
+
+      {reportTarget && (
+        <ReportModal
+          targetType={reportTarget.targetType}
+          targetId={reportTarget.targetId}
+          threadId={reportTarget.threadId}
+          onClose={() => setReportTarget(null)}
+        />
       )}
     </div>
   );

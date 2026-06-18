@@ -756,6 +756,14 @@ export default function Profile() {
               {profileUser.username}
             </h1>
             {profileUser.school && <SchoolBadge school={profileUser.school} size="sm" />}
+            {profileUser.year && (
+              <span
+                className="text-[11.5px] font-mono"
+                style={{ color: 'var(--color-muted-dim)' }}
+              >
+                Година {profileUser.year}
+              </span>
+            )}
           </div>
 
           {joinedStr && (

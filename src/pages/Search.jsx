@@ -80,7 +80,7 @@ function highlight(text, query) {
       <mark
         key={i}
         style={{
-          background: 'rgba(124,92,255,0.18)',
+          background: 'rgba(250,204,21,0.5)',
           color: 'var(--color-ink)',
           borderRadius: 2,
           padding: '0 1px',

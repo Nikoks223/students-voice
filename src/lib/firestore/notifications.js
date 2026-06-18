@@ -4,6 +4,7 @@ import {
   where,
   orderBy,
   limit,
+  startAfter,
   getDocs,
   addDoc,
   updateDoc,
@@ -34,6 +35,21 @@ export async function fetchNotifications(userId, { pageSize = 30 } = {}) {
     ),
   );
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
+
+export async function fetchNotificationsPage(userId, { pageSize = 20, lastDoc = null } = {}) {
+  const constraints = [
+    where('userId', '==', userId),
+    orderBy('createdAt', 'desc'),
+    ...(lastDoc ? [startAfter(lastDoc)] : []),
+    limit(pageSize),
+  ];
+  const snap = await getDocs(query(collection(db, 'notifications'), ...constraints));
+  return {
+    notifications: snap.docs.map((d) => ({ id: d.id, ...d.data() })),
+    lastDoc: snap.docs[snap.docs.length - 1] ?? null,
+    hasMore: snap.docs.length === pageSize,
+  };
 }
 
 export async function markAsRead(notificationId) {

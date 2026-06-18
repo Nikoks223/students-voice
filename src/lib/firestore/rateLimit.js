@@ -1,7 +1,7 @@
 import { doc, getDoc, runTransaction, increment, Timestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 
-const RATE_LIMITING_ENABLED = false;
+const RATE_LIMITING_ENABLED = true;
 
 /**
  * Sliding-window rate limiter backed by Firestore.

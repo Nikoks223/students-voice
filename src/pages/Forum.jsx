@@ -266,7 +266,7 @@ export default function Forum() {
                 <Button
                   variant="primary"
                   className="gap-2"
-                  onClick={() => navigate('/new')}
+                  onClick={() => navigate(forumId ? `/new?forum=${forumId}` : '/new')}
                   leftIcon={
                     <svg
                       className="w-3.5 h-3.5"

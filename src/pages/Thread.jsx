@@ -582,6 +582,8 @@ export default function Thread() {
   const [attachRemoving, setAttachRemoving] = useState(false);
   // Download confirmation modal
   const [downloadConfirmAtt, setDownloadConfirmAtt] = useState(null);
+  // Share toast
+  const [shareToast, setShareToast] = useState(false);
 
   // ── Fetch thread ──
   useEffect(() => {
@@ -885,6 +887,14 @@ export default function Thread() {
 
   const isOwner = !!userProfile && userProfile.id === thread.authorId;
   const isDeleted = thread.isDeleted && thread.isDeleted !== 'no';
+
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setShareToast(true);
+      setTimeout(() => setShareToast(false), 2000);
+    } catch {}
+  };
 
   const featuredMenuItem = isAdmin
     ? [{ label: thread.isFeatured ? 'Откажи истакнување' : 'Истакни', onClick: handleToggleFeatured }]
@@ -1419,6 +1429,40 @@ export default function Thread() {
                 </button>
 
                 <SaveButton thread={thread} size="md" />
+
+                <button
+                  onClick={handleShare}
+                  title="Копирај линк"
+                  aria-label="Копирај линк до дискусијата"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '6px 12px',
+                    borderRadius: 10,
+                    border: '1px solid var(--color-border)',
+                    background: 'transparent',
+                    color: 'var(--color-muted)',
+                    cursor: 'pointer',
+                    transition: 'all 0.18s cubic-bezier(0.16,1,0.3,1)',
+                    fontSize: 12.5,
+                    fontWeight: 500,
+                    flexShrink: 0,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--color-border-strong)';
+                    e.currentTarget.style.color = 'var(--color-ink-dim)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--color-border)';
+                    e.currentTarget.style.color = 'var(--color-muted)';
+                  }}
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                  </svg>
+                  Сподели
+                </button>
               </div>
             </div>
 
@@ -1585,6 +1629,30 @@ export default function Thread() {
             setReportTarget({ targetType: 'thread', targetId: threadId, threadId });
           }}
         />
+      )}
+
+      {shareToast && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: 28,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'var(--color-surface-hover)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 12,
+            padding: '10px 20px',
+            fontSize: 13,
+            fontWeight: 500,
+            color: 'var(--color-ink)',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.45)',
+            zIndex: 9999,
+            whiteSpace: 'nowrap',
+            animation: 'fadeUp 0.18s cubic-bezier(0.23,1,0.32,1) both',
+          }}
+        >
+          Линкот е копиран
+        </div>
       )}
     </>
   );

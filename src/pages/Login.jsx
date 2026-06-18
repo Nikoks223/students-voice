@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
@@ -308,13 +308,23 @@ export default function Login() {
               style={{ color: 'var(--color-muted-dim)' }}
             >
               Со најава се согласуваш со нашите{' '}
-              <span className="underline underline-offset-2 cursor-pointer hover:text-muted transition-colors">
+              <Link
+                to="/terms"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 hover:text-muted transition-colors"
+              >
                 Услови
-              </span>{' '}
+              </Link>{' '}
               и{' '}
-              <span className="underline underline-offset-2 cursor-pointer hover:text-muted transition-colors">
+              <Link
+                to="/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 hover:text-muted transition-colors"
+              >
                 Политика за приватност
-              </span>
+              </Link>
               .
             </p>
           </div>

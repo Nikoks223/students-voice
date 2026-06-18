@@ -51,10 +51,6 @@ export default function Onboarding() {
       setError('Избери го твоето училиште.');
       return;
     }
-    if (!year) {
-      setError('Избери ја твојата година.');
-      return;
-    }
     if (!acceptTerms) {
       setError('Мора да ги прифатиш Условите за користење.');
       return;
@@ -230,7 +226,7 @@ export default function Onboarding() {
           {/* Year */}
           <div>
             <p className="block text-sm font-medium text-ink mb-1.5">
-              Година <span className="text-coral">*</span>
+              Година
             </p>
             <div className="grid grid-cols-4 gap-2">
               {[1, 2, 3, 4].map((y) => (

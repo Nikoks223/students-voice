@@ -15,6 +15,7 @@ import { uploadToCloudinary } from '../lib/cloudinary';
 import { searchUsernames } from '../lib/firestore/users';
 import { validatePoll } from '../lib/firestore/polls';
 import PollEditor from '../components/PollEditor';
+import LinkPreviewCard from '../components/LinkPreviewCard';
 import Card from '../components/ui/Card';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
@@ -320,6 +321,7 @@ function ForumPicker({ value, onChange, forums = [], loading = false }) {
   const selected = value ? forums.find((f) => f.id === value) : null;
 
   return (
+    <>
     <div ref={wrapRef} className="relative">
       <button
         type="button"
@@ -515,6 +517,12 @@ function ForumPicker({ value, onChange, forums = [], loading = false }) {
         </div>
       )}
     </div>
+    {selected?.description && (
+      <p className="mt-2 text-[12px] leading-relaxed" style={{ color: 'var(--color-muted-dim)' }}>
+        {selected.description}
+      </p>
+    )}
+    </>
   );
 }
 
@@ -559,6 +567,22 @@ export default function NewThread() {
   const [mentionPopup, setMentionPopup] = useState(null);
   const mentionDropdownRef = useRef(null);
 
+  // Link preview
+  const [linkPreview, setLinkPreview] = useState(null);
+  const [linkPreviewLoading, setLinkPreviewLoading] = useState(false);
+  const fetchLinkPreviewRef = useRef(null);
+  fetchLinkPreviewRef.current = async (url) => {
+    if (linkPreview?.url === url) return;
+    setLinkPreview(null);
+    setLinkPreviewLoading(true);
+    try {
+      const res = await fetch(`/.netlify/functions/link-preview?url=${encodeURIComponent(url)}`);
+      const data = await res.json();
+      if (!data.error && (data.title || data.description)) setLinkPreview(data);
+    } catch {}
+    finally { setLinkPreviewLoading(false); }
+  };
+
   // File input refs
   const imageInputRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -600,7 +624,16 @@ export default function NewThread() {
         },
       }),
     ],
-    editorProps: { attributes: { class: 'sg-prose-content' } },
+    editorProps: {
+      attributes: { class: 'sg-prose-content' },
+      handlePaste: (_view, event) => {
+        const text = event.clipboardData?.getData('text/plain')?.trim();
+        if (text && /^https?:\/\/\S+$/.test(text)) {
+          fetchLinkPreviewRef.current?.(text);
+        }
+        return false;
+      },
+    },
   });
 
   const isEmpty = !editor || editor.isEmpty;
@@ -1233,6 +1266,17 @@ export default function NewThread() {
 
                 <EditorContent editor={editor} />
               </div>
+
+              {/* Link preview */}
+              {(linkPreviewLoading || linkPreview) && (
+                <div className="mt-3">
+                  <LinkPreviewCard
+                    preview={linkPreview}
+                    loading={linkPreviewLoading}
+                    onDismiss={linkPreview ? () => setLinkPreview(null) : undefined}
+                  />
+                </div>
+              )}
 
               {/* Upload error */}
               {uploadError && (

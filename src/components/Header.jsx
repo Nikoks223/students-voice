@@ -484,6 +484,33 @@ function NotificationPanel({ notifications, loading, onMarkRead, onMarkAllRead, 
           })
         )}
       </div>
+
+      {/* Footer */}
+      <div
+        style={{
+          borderTop: '1px solid var(--notif-header-divider)',
+          flexShrink: 0,
+          padding: '10px 16px',
+        }}
+      >
+        <Link
+          to="/notifications"
+          onClick={onClose}
+          style={{
+            display: 'block',
+            textAlign: 'center',
+            fontSize: 12,
+            fontWeight: 600,
+            color: 'var(--color-muted-dim)',
+            textDecoration: 'none',
+            transition: 'color 0.15s',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-ink-dim)')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-muted-dim)')}
+        >
+          Сите известувања →
+        </Link>
+      </div>
     </div>
   );
 }

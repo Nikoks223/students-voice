@@ -23,6 +23,7 @@ const ForumsPage = lazy(() => import('./pages/admin/ForumsPage'));
 const SuggestionsPage = lazy(() => import('./pages/admin/SuggestionsPage'));
 const StatsPage = lazy(() => import('./pages/admin/StatsPage'));
 const AdminsPage = lazy(() => import('./pages/admin/AdminsPage'));
+const Notifications = lazy(() => import('./pages/Notifications'));
 const Settings = lazy(() => import('./pages/Settings'));
 const Saved = lazy(() => import('./pages/Saved'));
 const Leaderboard = lazy(() => import('./pages/Leaderboard'));
@@ -124,6 +125,18 @@ function App() {
               <ProtectedRoute requireProfile={true}>
                 <Suspense fallback={<PageShimmer />}>
                   <SuggestForum />
+                </Suspense>
+              </ProtectedRoute>
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <MainLayout>
+              <ProtectedRoute requireProfile={true}>
+                <Suspense fallback={<PageShimmer />}>
+                  <Notifications />
                 </Suspense>
               </ProtectedRoute>
             </MainLayout>
