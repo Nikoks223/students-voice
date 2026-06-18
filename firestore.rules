@@ -1,0 +1,293 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function getUserDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (getUserDoc().role == 'admin' || getUserDoc().role == 'superadmin');
+    }
+
+    function isSuperAdmin() {
+      return isSignedIn() && getUserDoc().role == 'superadmin';
+    }
+
+    function isNotBanned() {
+      return isSignedIn() && getUserDoc().isBanned == false;
+    }
+
+    function counterFieldsOnly() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['upvoteCount', 'reactionCounts', 'commentCount', 'updatedAt']);
+    }
+
+    function pollFieldUpdateOnly() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['poll']);
+    }
+
+    // users
+    match /users/{userId} {
+      allow read: if true;
+      allow create: if isOwner(userId);
+      allow update: if
+        (request.auth.uid == userId
+          && !request.resource.data.diff(resource.data).affectedKeys()
+              .hasAny(['role', 'isBanned', 'banUntil', 'warningCount', 'isDeleted', 'deletedAt']))
+        || (isAdmin()
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']))
+        || (isSuperAdmin()
+          && resource.data.role != 'superadmin'
+          && request.resource.data.role in ['user', 'admin']);
+      allow delete: if isAdmin();
+
+      match /actions/{actionId} {
+        allow read, write: if isAdmin();
+      }
+    }
+
+    // usernames
+    match /usernames/{username} {
+      allow read: if true;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow delete: if isSignedIn() && (
+        resource.data.userId == request.auth.uid
+        || !exists(/databases/$(database)/documents/users/$(resource.data.userId))
+        || get(/databases/$(database)/documents/users/$(resource.data.userId)).data.isDeleted == true
+      );
+    }
+
+    // forums
+    match /forums/{forumId} {
+      allow read: if true;
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin()
+                    || (isNotBanned()
+                        && request.resource.data.diff(resource.data)
+                            .affectedKeys()
+                            .hasOnly(['threadCount', 'lastActivityAt']));
+    }
+
+    // threads
+    match /threads/{threadId} {
+      allow read: if true;
+
+      allow create: if isNotBanned()
+                    && request.resource.data.authorId == request.auth.uid;
+
+      allow update: if isOwner(resource.data.authorId)
+                    || isAdmin()
+                    || (isNotBanned() && (counterFieldsOnly() || pollFieldUpdateOnly()));
+
+      allow delete: if isOwner(resource.data.authorId) || isAdmin();
+
+      // threads/{threadId}/comments
+      match /comments/{commentId} {
+        allow read: if true;
+
+        allow create: if isNotBanned()
+                      && request.resource.data.authorId == request.auth.uid;
+
+        allow update: if isOwner(resource.data.authorId)
+                      || isAdmin()
+                      || (isNotBanned() && counterFieldsOnly());
+
+        allow delete: if isOwner(resource.data.authorId) || isAdmin();
+      }
+    }
+
+    // collectionGroup: comments
+    match /{path=**}/comments/{commentId} {
+      allow read: if true;
+      allow update: if isOwner(resource.data.authorId)
+                    || isAdmin()
+                    || (isNotBanned() && counterFieldsOnly());
+      allow delete: if isOwner(resource.data.authorId) || isAdmin();
+    }
+
+    // upvotes
+    match /upvotes/{upvoteId} {
+      allow read: if true;
+      allow create: if isNotBanned()
+                    && request.resource.data.userId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow update: if false;
+    }
+
+    // reactions
+    match /reactions/{reactionId} {
+      allow read: if true;
+
+      allow create: if isNotBanned()
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.reactionId in ['thumbs', 'laugh', 'think', 'heart', 'fire']
+                    && request.resource.data.targetType in ['thread', 'comment'];
+
+      allow update: if isSignedIn()
+                    && resource.data.userId == request.auth.uid
+                    && request.resource.data.userId == resource.data.userId
+                    && request.resource.data.reactionId in ['thumbs', 'laugh', 'think', 'heart', 'fire']
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactionId', 'updatedAt']);
+
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // pollVotes
+    match /pollVotes/{voteId} {
+      allow read: if true;
+
+      allow create: if isNotBanned()
+                    && request.resource.data.userId == request.auth.uid;
+
+      allow update: if isSignedIn()
+                    && resource.data.userId == request.auth.uid
+                    && request.resource.data.userId == resource.data.userId
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['optionId', 'votedAt']);
+
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // reports
+    match /reports/{reportId} {
+      allow read: if isAdmin();
+
+      allow create: if isNotBanned()
+                    && request.resource.data.reporterId == request.auth.uid
+                    && request.resource.data.status == 'pending';
+
+      allow update: if isAdmin()
+                    || (
+                      isSignedIn()
+                      && resource.data.reporterId == request.auth.uid
+                      && request.resource.data.diff(resource.data)
+                          .affectedKeys()
+                          .hasOnly(['reporterId', 'reporterUsername'])
+                    );
+
+      allow delete: if false;
+    }
+
+    // moderationLog
+    match /moderationLog/{logId} {
+      allow read, write: if isAdmin();
+    }
+
+    // forumSuggestions
+    match /forumSuggestions/{suggestionId} {
+      allow read: if isAdmin()
+                  || (isSignedIn() && resource.data.userId == request.auth.uid);
+
+      allow create: if isNotBanned()
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.status == 'pending';
+
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // notifications
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+
+      allow create: if isNotBanned()
+                    && (request.resource.data.actorId == request.auth.uid
+                        || request.resource.data.fromUserId == request.auth.uid)
+                    && request.resource.data.userId != request.auth.uid
+                    && request.resource.data.type in [
+    'mention', 'new_thread', 'forum_comment',
+    'thread_comment', 'suggestion_accepted', 'suggestion_declined',
+    'upvote', 'new_follower'
+   ];
+
+      allow update: if isAdmin()
+                    || (
+                      isSignedIn()
+                      && resource.data.userId == request.auth.uid
+                      && request.resource.data.diff(resource.data)
+                          .affectedKeys()
+                          .hasOnly(['read', 'readAt'])
+                    );
+
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // follows (forum follows)
+    match /follows/{followId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isNotBanned() && request.resource.data.userId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow update: if false;
+    }
+
+    // threadFollows (thread follows)
+    match /threadFollows/{followId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isNotBanned() && request.resource.data.userId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow update: if false;
+    }
+
+    // userFollows (user follows — public)
+    match /userFollows/{followId} {
+      allow read: if true;
+      allow create: if isNotBanned()
+                    && request.resource.data.followerId == request.auth.uid
+                    && request.resource.data.followerId != request.resource.data.followingId;
+      allow delete: if isSignedIn() && resource.data.followerId == request.auth.uid;
+      allow update: if false;
+    }
+
+    // savedPosts
+    match /savedPosts/{savedId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isNotBanned() && request.resource.data.userId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow update: if false;
+    }
+
+    // stats
+    match /stats/{document=**} {
+      allow read: if true;
+      allow create: if isAdmin()
+        || (isSignedIn()
+            && request.resource.data.keys().hasOnly([
+              'totalUsers', 'totalThreads', 'totalComments', 'totalUpvotes', 'totalReports',
+              'newUsers', 'newThreads', 'newComments', 'newUpvotes', 'newReports',
+              'userCount', 'threadCount', 'commentCount', 'upvoteCount', 'updatedAt',
+              'schoolId', 'schoolName', 'city', 'forumId', 'userId', 'username', 'date'
+            ]));
+      allow delete: if isAdmin();
+      allow update: if isAdmin()
+        || (isNotBanned()
+            && request.resource.data.diff(resource.data)
+                .affectedKeys()
+                .hasOnly([
+                  'totalUsers', 'totalThreads', 'totalComments', 'totalUpvotes', 'totalReports',
+                  'newUsers', 'newThreads', 'newComments', 'newUpvotes', 'newReports',
+                  'userCount', 'threadCount', 'commentCount', 'upvoteCount', 'updatedAt'
+                ]));
+    }
+
+    // rateLimits — per-user sliding-window counters for app-layer throttling
+    match /rateLimits/{userId} {
+      match /actions/{action} {
+        allow read, create, update: if isSignedIn() && request.auth.uid == userId;
+        allow delete: if false;
+      }
+    }
+
+    // default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
