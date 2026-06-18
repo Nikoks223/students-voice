@@ -37,6 +37,7 @@ import { fetchUserPollVote } from '../lib/firestore/polls';
 import { cloudinaryThumb } from '../lib/cloudinary';
 import AttachmentDownloadConfirm from '../components/AttachmentDownloadConfirm';
 import { removeThreadAttachment, setThreadFeatured } from '../lib/firestore/threads';
+import LinkPreviewCard from '../components/LinkPreviewCard';
 
 const COMMENT_SORTS = [
   { key: 'best', label: 'Најдобри' },
@@ -584,6 +585,9 @@ export default function Thread() {
   const [downloadConfirmAtt, setDownloadConfirmAtt] = useState(null);
   // Share toast
   const [shareToast, setShareToast] = useState(false);
+  // Link preview
+  const [linkPreview, setLinkPreview] = useState(null);
+  const [linkPreviewLoading, setLinkPreviewLoading] = useState(false);
 
   // ── Fetch thread ──
   useEffect(() => {
@@ -672,6 +676,35 @@ export default function Thread() {
     setUserPollVote(votedOptionId);
     setThread((t) => (t?.poll ? { ...t, poll: updatedPoll } : t));
   }, []);
+
+  // ── Link preview — fetch for first external URL in thread body ──
+  useEffect(() => {
+    if (!thread?.body) return;
+    const tmp = document.createElement('div');
+    tmp.innerHTML = thread.body;
+    let url = null;
+    for (const a of tmp.querySelectorAll('a')) {
+      const href = a.getAttribute('href') ?? '';
+      if (
+        href.startsWith('http') &&
+        !a.classList.contains('sg-mention') &&
+        !href.includes('res.cloudinary.com')
+      ) {
+        url = href;
+        break;
+      }
+    }
+    if (!url) return;
+    setLinkPreviewLoading(true);
+    setLinkPreview(null);
+    fetch(`/.netlify/functions/link-preview?url=${encodeURIComponent(url)}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (!data.error && (data.title || data.description)) setLinkPreview(data);
+      })
+      .catch(() => {})
+      .finally(() => setLinkPreviewLoading(false));
+  }, [thread?.body]);
 
   // ── Comment callbacks (passed to CommentItem) ──
   const handleCommentAdded = useCallback((comment) => {
@@ -1201,6 +1234,11 @@ export default function Thread() {
               ) : (
                 <>
                   <ThreadBodyDisplay body={thread.body} isDeleted={thread.isDeleted} />
+                  {!isDeleted && (linkPreviewLoading || linkPreview) && (
+                    <div className="mt-4">
+                      <LinkPreviewCard preview={linkPreview} loading={linkPreviewLoading} />
+                    </div>
+                  )}
                   {!isDeleted && (
                     <>
                       {thread.attachmentsRemoved ? (
