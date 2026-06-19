@@ -9,7 +9,7 @@ const VARIANT = {
   hover: clsx(
     'bg-surface border border-border rounded-2xl',
     'shadow-[var(--shadow-card)]',
-    'transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform',
+    'transition-[background-color,border-color,box-shadow,transform] duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform',
     'hover:bg-[var(--color-surface-hover)] hover:border-border-strong',
     'hover:shadow-[var(--shadow-card-hover)]',
     'hover:-translate-y-px',

@@ -125,7 +125,7 @@ export default function Login() {
 
           {/* Brand mark */}
           <div className="relative z-10">
-            <img src="/logo.png" alt="Средношколски Глас" className="w-8 h-8 object-contain" />
+            <img src="/logo.png" alt="Средношколски Глас" className="w-8 h-8 object-contain" width={32} height={32} />
           </div>
 
           {/* Headline */}
@@ -164,7 +164,7 @@ export default function Login() {
         <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 md:px-16">
           {/* Mobile brand */}
           <div className="flex items-center gap-2.5 mb-10 md:hidden">
-            <img src="/logo.png" alt="Средношколски Глас" className="h-8 w-auto" />
+            <img src="/logo.png" alt="Средношколски Глас" className="h-8 w-auto" width={32} height={32} />
           </div>
 
           <div className="w-full max-w-[360px]">

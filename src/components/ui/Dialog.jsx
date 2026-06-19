@@ -72,7 +72,7 @@ export const DialogContent = forwardRef(function DialogContent(
               key="dialog-inner"
               className={clsx(
                 'bg-surface border border-border-strong rounded-2xl',
-                'shadow-[var(--shadow-pop)]',
+                'shadow-[var(--shadow-pop)] overscroll-contain',
                 className,
               )}
               initial={{ opacity: 0, scale: 0.96, y: 8 }}

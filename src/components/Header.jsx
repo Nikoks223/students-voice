@@ -9,7 +9,7 @@ import Chip from './ui/Chip';
 
 function SearchIcon() {
   return (
-    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-3.5 h-3.5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -24,6 +24,7 @@ function ChevronDown({ open }) {
   return (
     <svg
       className="w-3 h-3 text-muted hidden md:block"
+      aria-hidden="true"
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"
@@ -39,7 +40,7 @@ function ChevronDown({ open }) {
 
 function WriteIcon() {
   return (
-    <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-4 h-4 shrink-0" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -52,7 +53,7 @@ function WriteIcon() {
 
 function ShieldIcon() {
   return (
-    <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-4 h-4 shrink-0" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -65,7 +66,7 @@ function ShieldIcon() {
 
 function LogoutIcon() {
   return (
-    <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-4 h-4 shrink-0" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -78,7 +79,7 @@ function LogoutIcon() {
 
 function ProfileIcon() {
   return (
-    <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-4 h-4 shrink-0" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -91,7 +92,7 @@ function ProfileIcon() {
 
 function SettingsIcon() {
   return (
-    <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-4 h-4 shrink-0" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -110,7 +111,7 @@ function SettingsIcon() {
 
 function BookmarkNavIcon() {
   return (
-    <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-4 h-4 shrink-0" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -362,7 +363,7 @@ function NotificationPanel({ notifications, loading, onMarkRead, onMarkAllRead, 
       </div>
 
       {/* List */}
-      <div style={{ overflowY: 'auto', flex: 1 }}>
+      <div style={{ overflowY: 'auto', flex: 1 }} aria-live="polite">
         {loading ? (
           <div style={{ padding: '8px 0' }}>
             {[1, 2, 3, 4].map((i) => (
@@ -661,6 +662,8 @@ export default function Header({ onMenuToggle }) {
               src="/logo.png"
               alt="Средношколски Глас"
               className="h-8 w-auto shrink-0"
+              width={32}
+              height={32}
               style={{ transition: 'opacity 0.2s' }}
             />
             <span
@@ -682,6 +685,9 @@ export default function Header({ onMenuToggle }) {
               <input
                 ref={searchRef}
                 type="search"
+                name="q"
+                autoComplete="off"
+                aria-label="Пребарај дискусии"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Пребарај дискусии..."
@@ -691,6 +697,7 @@ export default function Header({ onMenuToggle }) {
                 <button
                   type="button"
                   onClick={() => setQuery('')}
+                  aria-label="Исчисти пребарување"
                   className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded"
                   style={{ color: 'var(--color-muted-dim)', transition: 'color 0.15s' }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-ink-dim)')}
@@ -729,8 +736,11 @@ export default function Header({ onMenuToggle }) {
 
               <div className="relative" ref={menuRef}>
                 <button
+                  type="button"
                   onClick={() => setMenuOpen((v) => !v)}
-                  className="flex items-center gap-2 pl-2 pr-2.5 py-1.5 rounded-lg hover:bg-surface transition-all duration-200"
+                  aria-haspopup="menu"
+                  aria-expanded={menuOpen}
+                  className="flex items-center gap-2 pl-2 pr-2.5 py-1.5 rounded-lg hover:bg-surface outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-1 focus-visible:ring-offset-bg transition-[background-color] duration-200"
                 >
                   <Avatar
                     username={userProfile.username}

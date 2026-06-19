@@ -52,7 +52,7 @@ function ToolbarBtn({ active, disabled, onClick, title, children }) {
         color: active ? 'var(--color-accent)' : disabled ? '#2D2D30' : 'var(--color-muted)',
         border: active ? '1px solid rgba(124,92,255,0.2)' : '1px solid transparent',
         cursor: disabled ? 'not-allowed' : 'pointer',
-        transition: 'all 0.15s',
+        transition: 'background 0.15s, color 0.15s, border-color 0.15s',
       }}
       onMouseEnter={(e) => {
         if (!active && !disabled) e.currentTarget.style.color = 'var(--color-ink-dim)';
