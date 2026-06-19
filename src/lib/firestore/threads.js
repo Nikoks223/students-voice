@@ -16,7 +16,7 @@ import {
   addDoc,
 } from 'firebase/firestore';
 import { db } from '../firebase';
-import { getForumById } from '../../data/forumsHelpers';
+import { getForumById } from '../../data/forums';
 import { invalidateLeaderboardCache } from './stats';
 import { validatePoll, generateOptionId } from './polls';
 import { checkAndIncrement } from './rateLimit';

@@ -1,6 +1,6 @@
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
-import { getForumById } from '../../data/forumsHelpers';
+import { getForumById } from '../../data/forums';
 
 // Full-text search is not supported natively by Firestore.
 // This MVP approach fetches the latest N threads and filters client-side.

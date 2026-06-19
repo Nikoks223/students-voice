@@ -1,5 +1,4 @@
-// Сите 16 тематски форуми од спецификацијата
-// За додавање нов форум подоцна: само додај нов објект тука и pokreни ја seed скриптата
+import { SCHOOLS } from './schools';
 
 export const TOPIC_FORUMS = [
   {
@@ -115,3 +114,21 @@ export const TOPIC_FORUMS = [
     color: '#737373',
   },
 ];
+
+const schoolToForum = (school) => ({
+  id: `school-${school.id}`,
+  name: school.name,
+  shortName: school.shortName,
+  description: `Форум за учениците од ${school.name}`,
+  icon: '🏫',
+  color: '#475569',
+  type: 'school',
+  city: school.city,
+});
+
+export const ALL_FORUMS = [
+  ...TOPIC_FORUMS.map((f) => ({ ...f, type: 'topic' })),
+  ...SCHOOLS.map(schoolToForum),
+];
+
+export const getForumById = (id) => ALL_FORUMS.find((f) => f.id === id);

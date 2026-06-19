@@ -1,6 +1,6 @@
 import { collection, query, where, orderBy, limit, getDocs, Timestamp } from 'firebase/firestore';
 import { db } from './firebase';
-import { getForumById } from '../data/forumsHelpers';
+import { getForumById } from '../data/forums';
 
 function mapThread(snap) {
   const data = snap.data();

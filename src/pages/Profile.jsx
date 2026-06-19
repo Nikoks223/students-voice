@@ -28,7 +28,7 @@ import {
 import { uploadBanner } from '../lib/cloudinary';
 import { cloudinaryThumb } from '../lib/cloudinary';
 import { getAvatarGradient } from '../lib/avatarGradient';
-import { getForumById } from '../data/forumsHelpers';
+import { getForumById } from '../data/forums';
 import { timeAgo } from '../utils/timeAgo';
 
 // ── Icons (no external dep) ────────────────────────────────────────────────────

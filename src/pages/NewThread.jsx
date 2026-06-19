@@ -20,42 +20,9 @@ import Card from '../components/ui/Card';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import { getBanMessage } from '../utils/banMessage';
+import { fmt } from '../utils/format';
 
 const TITLE_MAX = 200;
-
-const EDITOR_CSS = `
-.sg-prose-content { outline: none; min-height: 180px; padding: 14px 16px; color: var(--color-ink-dim); font-size: 14px; line-height: 1.65; }
-.sg-prose-content > * + * { margin-top: 0.65em; }
-.sg-prose-content p { margin: 0; }
-.sg-prose-content strong { color: var(--color-ink); font-weight: 600; }
-.sg-prose-content em { color: var(--color-ink-dim); font-style: italic; }
-.sg-prose-content code { background: var(--code-bg); border: 1px solid var(--code-border); border-radius: 4px; padding: 1px 5px; font-size: 12.5px; color: var(--color-accent-bright); font-family: monospace; }
-.sg-prose-content pre { background: var(--color-bg-elevated); border: 1px solid var(--code-border); border-radius: 10px; padding: 14px 16px; overflow-x: auto; }
-.sg-prose-content pre code { background: none; border: none; padding: 0; font-size: 13px; color: var(--color-ink-dim); }
-.sg-prose-content blockquote { border-left: 2px solid rgba(124,92,255,0.4); padding-left: 14px; color: var(--color-muted); font-style: italic; }
-.sg-prose-content ul { padding-left: 20px; list-style-type: disc; }
-.sg-prose-content ol { padding-left: 20px; list-style-type: decimal; }
-.sg-prose-content li { margin: 0.2em 0; }
-.sg-prose-content a { color: var(--color-accent); text-decoration: underline; text-underline-offset: 2px; }
-.sg-prose-content p.is-editor-empty:first-child::before { content: attr(data-placeholder); color: var(--color-muted-dim); pointer-events: none; float: left; height: 0; }
-.sg-prose-content img { border-radius: 8px; max-width: 100%; margin: 8px 0; display: block; }
-.sg-prose-content .sg-mention { color: var(--color-accent-bright); font-weight: 500; cursor: default; }
-@keyframes sg-fade-up { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-.sg-fu-0 { animation: sg-fade-up 0.22s cubic-bezier(0.23,1,0.32,1) both; }
-.sg-fu-1 { animation: sg-fade-up 0.22s 0.05s cubic-bezier(0.23,1,0.32,1) both; }
-.sg-fu-2 { animation: sg-fade-up 0.22s 0.10s cubic-bezier(0.23,1,0.32,1) both; }
-@keyframes sg-dropdown-in { from { opacity: 0; transform: translateY(4px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-.sg-dropdown-in { animation: sg-dropdown-in 0.14s cubic-bezier(0.23,1,0.32,1) both; }
-`;
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-function fmt(bytes) {
-  if (!bytes) return '';
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1048576) return `${(bytes / 1024).toFixed(0)} KB`;
-  return `${(bytes / 1048576).toFixed(1)} MB`;
-}
 
 function parseVideoUrl(raw) {
   const url = raw.trim();
@@ -780,8 +747,6 @@ export default function NewThread() {
 
   return (
     <>
-      <style>{EDITOR_CSS}</style>
-
       {/* Hidden file inputs */}
       <input
         ref={imageInputRef}

@@ -38,42 +38,13 @@ import { cloudinaryThumb } from '../lib/cloudinary';
 import AttachmentDownloadConfirm from '../components/AttachmentDownloadConfirm';
 import { removeThreadAttachment, setThreadFeatured } from '../lib/firestore/threads';
 import LinkPreviewCard from '../components/LinkPreviewCard';
+import { fmt } from '../utils/format';
 
 const COMMENT_SORTS = [
   { key: 'best', label: 'Најдобри' },
   { key: 'new', label: 'Нови' },
   { key: 'old', label: 'Стари' },
 ];
-
-const PROSE_CSS = `
-.thread-prose { color: var(--color-ink-dim); font-size: 14px; line-height: 1.65; }
-.thread-prose > * + * { margin-top: 0.65em; }
-.thread-prose p { margin: 0; }
-.thread-prose strong { color: var(--color-ink); font-weight: 600; }
-.thread-prose em { color: var(--color-ink-dim); }
-.thread-prose code { background: var(--code-bg); border: 1px solid var(--code-border); border-radius: 4px; padding: 1px 5px; font-size: 12.5px; color: var(--color-accent-bright); font-family: monospace; }
-.thread-prose pre { background: var(--color-bg-elevated); border: 1px solid var(--code-border); border-radius: 10px; padding: 14px 16px; overflow-x: auto; }
-.thread-prose pre code { background: none; border: none; padding: 0; font-size: 13px; color: var(--color-ink-dim); }
-.thread-prose blockquote { border-left: 2px solid rgba(124,92,255,0.4); padding-left: 14px; color: var(--color-muted); font-style: italic; }
-.thread-prose ul { padding-left: 20px; list-style-type: disc; }
-.thread-prose ol { padding-left: 20px; list-style-type: decimal; }
-.thread-prose li { margin: 0.2em 0; }
-.thread-prose a { color: var(--color-accent); text-decoration: underline; text-underline-offset: 2px; }
-.thread-prose img { border-radius: 8px; max-width: 100%; margin: 8px 0; display: block; }
-.thread-prose .sg-mention { color: var(--color-accent-bright); font-weight: 500; text-decoration: none; }
-.thread-prose a.sg-mention:hover { text-decoration: underline; }
-.thread-edit-prose { outline: none; min-height: 140px; padding: 12px 14px; color: var(--color-ink-dim); font-size: 14px; line-height: 1.65; }
-.thread-edit-prose > * + * { margin-top: 0.65em; }
-.thread-edit-prose p { margin: 0; }
-.thread-edit-prose p.is-editor-empty:first-child::before { content: attr(data-placeholder); color: var(--color-muted-dim); pointer-events: none; float: left; height: 0; }
-`;
-
-function fmt(bytes) {
-  if (!bytes) return '';
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1048576) return `${(bytes / 1024).toFixed(0)} KB`;
-  return `${(bytes / 1048576).toFixed(1)} MB`;
-}
 
 function AttachmentsDisplay({ attachments, body, onFileClick }) {
   if (!attachments?.length) return null;
@@ -971,7 +942,6 @@ export default function Thread() {
 
   return (
     <>
-      <style>{PROSE_CSS}</style>
       <div className="space-y-4">
         {/* ── Breadcrumb ── */}
         <nav className="flex items-center gap-1.5 text-[12px]" style={{ color: 'var(--color-muted-dim)' }}>
