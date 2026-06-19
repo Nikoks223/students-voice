@@ -62,6 +62,11 @@ function CommentCard({ comment, thread, initiallyVoted, onReport }) {
       ref={cardRef}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
+      onClick={(e) => {
+        if (e.target.closest('a, button')) return;
+        const forumId = thread?.forumId ?? comment.forumId ?? '';
+        navigate(`/p/${forumId}/${comment.threadId}#comment-${comment.id}`);
+      }}
       className="rounded-2xl p-4"
       style={{
         background: 'var(--color-surface)',
@@ -69,6 +74,7 @@ function CommentCard({ comment, thread, initiallyVoted, onReport }) {
         boxShadow: 'var(--shadow-card)',
         position: 'relative',
         overflow: 'hidden',
+        cursor: 'pointer',
       }}
     >
       <div
@@ -223,18 +229,6 @@ function CommentCard({ comment, thread, initiallyVoted, onReport }) {
             >
               Одговори
             </button>
-          )}
-
-          {thread && (
-            <Link
-              to={`/p/${thread.forumId}/${thread.id}`}
-              className="px-2 py-1.5 rounded-lg text-[11.5px]"
-              style={{ color: 'var(--color-muted-dim)', transition: 'color 0.18s', textDecoration: 'none' }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-muted)')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-muted-dim)')}
-            >
-              Прикажи нишка
-            </Link>
           )}
 
           <button
