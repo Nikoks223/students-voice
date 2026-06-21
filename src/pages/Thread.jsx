@@ -1393,19 +1393,19 @@ export default function Thread() {
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12.5px] font-medium"
                   style={{
                     background: followed ? 'rgba(124,92,255,0.08)' : 'transparent',
-                    border: `1px solid ${followed ? 'rgba(124,92,255,0.2)' : 'rgba(255,255,255,0.07)'}`,
+                    border: `1px solid ${followed ? 'rgba(124,92,255,0.2)' : 'var(--color-border)'}`,
                     color: followed ? 'var(--color-accent)' : 'var(--color-muted)',
                     transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)',
                   }}
                   onMouseEnter={(e) => {
                     if (!followed) {
-                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
+                      e.currentTarget.style.borderColor = 'var(--color-border-strong)';
                       e.currentTarget.style.color = 'var(--color-ink-dim)';
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!followed) {
-                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)';
+                      e.currentTarget.style.borderColor = 'var(--color-border)';
                       e.currentTarget.style.color = 'var(--color-muted)';
                     }
                   }}
