@@ -120,6 +120,7 @@ export async function createThread({
   authorSchool,
   schoolId,
   poll = null,
+  isAnonymous = false,
 }) {
   await checkAndIncrement(authorId, 'thread', 5, 3600);
 
@@ -157,6 +158,7 @@ export async function createThread({
       body,
       attachments,
       ...(pollData ? { poll: pollData } : {}),
+      isAnonymous: isAnonymous === true,
       upvoteCount: 0,
       commentCount: 0,
       viewCount: 0,

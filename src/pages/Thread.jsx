@@ -983,9 +983,13 @@ export default function Thread() {
           <div className="relative px-4 sm:px-6 pt-5 pb-5">
             {/* Author row */}
             <div className="flex items-center gap-2.5 mb-4">
-              <Avatar username={thread.authorUsername} avatarUrl={null} size="sm" />
+              <Avatar username={thread.isAnonymous ? null : thread.authorUsername} avatarUrl={null} size="sm" />
               <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 flex-1 min-w-0">
-                {thread.authorUsername === '[избришан корисник]' ? (
+                {thread.isAnonymous ? (
+                  <span className="text-[13px] italic" style={{ color: 'var(--color-muted-dim)' }}>
+                    Анонимен
+                  </span>
+                ) : thread.authorUsername === '[избришан корисник]' ? (
                   <span className="text-[13px] italic" style={{ color: 'var(--color-muted-dim)' }}>
                     {thread.authorUsername}
                   </span>

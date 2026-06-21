@@ -530,6 +530,9 @@ export default function NewThread() {
   // Poll
   const [pollState, setPollState] = useState(null); // null = disabled
 
+  // Anonymous posting
+  const [isAnonymous, setIsAnonymous] = useState(false);
+
   // Mention popup (for TipTap suggestion)
   const [mentionPopup, setMentionPopup] = useState(null);
   const mentionDropdownRef = useRef(null);
@@ -733,6 +736,7 @@ export default function NewThread() {
         authorSchool: getSchoolById(userProfile.school)?.name ?? userProfile.school ?? null,
         schoolId: userProfile.school ?? '',
         poll: pollPayload,
+        isAnonymous,
       });
 
       navigate(`/p/${forumId}/${newId}`);
@@ -1305,6 +1309,55 @@ export default function NewThread() {
                 </p>
               )}
             </div>
+
+            {/* Anonymous toggle */}
+            <button
+              type="button"
+              role="switch"
+              aria-checked={isAnonymous}
+              onClick={() => setIsAnonymous((v) => !v)}
+              className="flex items-center gap-2.5 w-fit select-none"
+              style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+            >
+              <div
+                style={{
+                  position: 'relative',
+                  width: 34,
+                  height: 20,
+                  borderRadius: 10,
+                  background: isAnonymous ? 'var(--color-accent)' : 'var(--color-surface-2)',
+                  border: `1px solid ${isAnonymous ? 'rgba(124,92,255,0.4)' : 'var(--color-border-strong)'}`,
+                  transition: 'background 0.2s, border-color 0.2s',
+                  flexShrink: 0,
+                }}
+              >
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 2,
+                    left: isAnonymous ? 14 : 2,
+                    width: 14,
+                    height: 14,
+                    borderRadius: '50%',
+                    background: 'white',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                    transition: 'left 0.18s cubic-bezier(0.23,1,0.32,1)',
+                  }}
+                />
+              </div>
+              <span
+                className="text-[12px] font-medium"
+                style={{ color: isAnonymous ? 'var(--color-ink-dim)' : 'var(--color-muted)', transition: 'color 0.2s' }}
+              >
+                Објави анонимно
+              </span>
+              {isAnonymous && (
+                <span className="text-[11px]" style={{ color: 'var(--color-muted-dim)' }}>
+                  · Твоето корисничко име нема да биде видливо
+                </span>
+              )}
+            </button>
+
             <div className="flex items-center gap-2">
               <Button variant="ghost" onClick={() => navigate('/')} className="flex-1 sm:flex-none">
                 Откажи
@@ -1320,7 +1373,7 @@ export default function NewThread() {
                   !canSubmit && !(submitting || uploading)
                     ? {
                         background: 'rgba(124,92,255,0.18)',
-                        color: 'rgba(255,255,255,0.22)',
+                        color: 'var(--color-muted-dim)',
                         boxShadow: 'none',
                       }
                     : undefined

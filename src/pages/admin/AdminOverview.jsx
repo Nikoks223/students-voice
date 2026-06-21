@@ -50,7 +50,7 @@ function KpiCard({ label, value, delta, loading }) {
           lineHeight: 1,
         }}
       >
-        {value != null ? fmt(value) : '�'}
+        {value != null ? fmt(value) : '—'}
       </p>
       {delta != null && delta !== 0 && (
         <span style={{ fontSize: 10, fontWeight: 700, color: delta > 0 ? '#22D3EE' : 'var(--color-muted)' }}>
@@ -472,7 +472,7 @@ function RecentActivityCard() {
             </>
           )}
           {item.moderatorUsername && (
-            <span style={{ color: 'var(--color-muted-dim)' }}> � @{item.moderatorUsername}</span>
+            <span style={{ color: 'var(--color-muted-dim)' }}> · @{item.moderatorUsername}</span>
           )}
         </p>
         <span style={{ fontSize: 10, color: 'var(--color-muted-dimmer)', fontFamily: 'monospace', flexShrink: 0 }}>

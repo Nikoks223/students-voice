@@ -249,7 +249,7 @@ export default function FollowingList() {
             disabled={loadingMore}
             onClick={loadMore}
           >
-            {loadingMore ? 'Вчитување�' : 'Вчитај повеќе'}
+            {loadingMore ? 'Вчитување…' : 'Вчитај повеќе'}
           </Button>
         </div>
       )}

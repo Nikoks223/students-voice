@@ -265,7 +265,7 @@ function ReportCard({ report, adminId, onResolved }) {
       {/* Reporter details */}
       {report.details && (
         <p style={{ fontSize: 12, color: 'var(--color-muted)', fontStyle: 'italic', margin: '0 0 11px' }}>
-          �{report.details}"
+          "{report.details}"
         </p>
       )}
 
@@ -301,9 +301,9 @@ function ReportCard({ report, adminId, onResolved }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           <span style={{ fontSize: 12.5, color: '#FCA5A5' }}>
             {confirmAction === 'banPerm'
-              ? 'Траен бан � сигурно?'
+              ? 'Траен бан — сигурно?'
               : confirmAction === 'ban'
-                ? 'Бан 7 дена � сигурно?'
+                ? 'Бан 7 дена — сигурно?'
                 : 'Сигурно?'}
           </span>
           <div style={{ display: 'flex', gap: 6, marginLeft: 'auto' }}>
@@ -455,12 +455,12 @@ export function ReportsTab({ status, adminId }) {
           {status === 'pending' ? '✨' : '📋'}
         </p>
         <p style={{ color: 'var(--color-ink-dim)', fontSize: 13.5, fontWeight: 600, margin: 0 }}>
-          {status === 'pending' ? 'С� е чисто овде' : 'Нема решени пријави'}
+          {status === 'pending' ? 'Сè е чисто овде' : 'Нема решени пријави'}
         </p>
         <p style={{ color: 'var(--color-muted-dim)', fontSize: 12.5, margin: 0 }}>
           {status === 'pending'
             ? 'Нема пријави кои чекаат.'
-            : 'С� уште нема решени пријави во оваа категорија.'}
+            : 'Сè уште нема решени пријави во оваа категорија.'}
         </p>
       </Card>
     );
@@ -479,7 +479,7 @@ export function ReportsTab({ status, adminId }) {
           disabled={loadingMore}
           onClick={loadMore}
         >
-          {loadingMore ? 'Вчитување�' : 'Вчитај повеќе'}
+          {loadingMore ? 'Вчитување…' : 'Вчитај повеќе'}
         </Button>
       )}
     </div>

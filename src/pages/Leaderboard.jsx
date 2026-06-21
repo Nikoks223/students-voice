@@ -350,9 +350,6 @@ export default function Leaderboard() {
             </h1>
           </div>
         </div>
-        <p className="text-[11.5px] shrink-0" style={{ color: 'var(--color-muted-dimmer)' }}>
-          Се ажурира во реално време
-        </p>
       </div>
 
       <div aria-hidden style={{ height: 1, background: 'var(--color-surface-hover)' }} />

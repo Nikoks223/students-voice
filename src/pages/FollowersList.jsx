@@ -230,7 +230,7 @@ export default function FollowersList() {
           ) : followers.length === 0 ? (
             <div className="p-10 text-center">
               <p className="text-[13px]" style={{ color: 'var(--color-muted-dim)' }}>
-                С� уште нема следачи.
+                Сè уште нема следачи.
               </p>
             </div>
           ) : (
@@ -249,7 +249,7 @@ export default function FollowersList() {
             disabled={loadingMore}
             onClick={loadMore}
           >
-            {loadingMore ? 'Вчитување�' : 'Вчитај повеќе'}
+            {loadingMore ? 'Вчитување…' : 'Вчитај повеќе'}
           </Button>
         </div>
       )}

@@ -300,8 +300,12 @@ export default function PostCard({ thread, index = 0, initiallyVoted }) {
           style={{ borderTop: '1px solid var(--color-border)', paddingTop: 11 }}
         >
           <div className="flex items-center gap-2 min-w-0">
-            <Avatar username={thread.authorUsername} size="sm" />
-            {thread.authorUsername === '[избришан корисник]' ? (
+            <Avatar username={thread.isAnonymous ? null : thread.authorUsername} size="sm" />
+            {thread.isAnonymous ? (
+              <span className="italic truncate" style={{ fontSize: 12, color: 'var(--color-muted-dim)' }}>
+                Анонимен
+              </span>
+            ) : thread.authorUsername === '[избришан корисник]' ? (
               <span className="italic truncate" style={{ fontSize: 12, color: 'var(--color-muted-dim)' }}>
                 {thread.authorUsername}
               </span>

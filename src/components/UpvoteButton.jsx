@@ -49,7 +49,7 @@ export default function UpvoteButton({
             ? '0 0 16px rgba(124,92,255,0.14), inset 0 1px 0 rgba(124,92,255,0.15)'
             : 'none'
           : isMd
-            ? 'var(--shadow-card)'
+            ? '0 1px 3px rgba(0,0,0,0.08)'
             : 'none',
         transform: voted ? 'scale(1.03)' : 'scale(1)',
         transition: 'all 0.22s cubic-bezier(0.16,1,0.3,1)',
@@ -57,7 +57,7 @@ export default function UpvoteButton({
       onMouseEnter={(e) => {
         if (!voted && !pending) {
           e.currentTarget.style.color = 'var(--color-ink-dim)';
-          if (isMd) e.currentTarget.style.background = '#2F2F34';
+          if (isMd) e.currentTarget.style.background = 'var(--color-surface-3)';
         }
       }}
       onMouseLeave={(e) => {
