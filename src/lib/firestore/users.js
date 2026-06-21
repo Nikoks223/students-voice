@@ -8,7 +8,7 @@
   startAfter,
   getDocs,
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../db';
 
 // NOTE: fetchModeratedUsers uses two separate queries (Firestore doesn't support OR).
 // warningCount > 0 may need an index: Firebase Console → Indexes → warningCount ASC.

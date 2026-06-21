@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Recursively converts undefined fields to null, or strips them entirely.
  * Firestore rejects writes containing undefined; this is a permanent safety net.
  */
@@ -19,6 +19,6 @@ export function sanitizeForFirestore(data, path = '', { stripUndefined = false }
     }
     return cleaned;
   }
-  // Firestore Timestamp, Date, FieldValue (increment/serverTimestamp), primitives — pass through.
+  // Firestore Timestamp, Date, FieldValue (increment/serverTimestamp), primitives â€” pass through.
   return data;
 }

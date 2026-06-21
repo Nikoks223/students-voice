@@ -1,4 +1,4 @@
-import {
+﻿import {
   doc,
   getDoc,
   getDocs,
@@ -9,7 +9,7 @@ import {
   where,
   collectionGroup,
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../db';
 import { SCHOOLS } from '../../data/schools';
 
 // Firestore path helpers — all live under the 'stats' top-level collection

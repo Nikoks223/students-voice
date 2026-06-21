@@ -1,4 +1,4 @@
-import {
+﻿import {
   collection,
   query,
   where,
@@ -10,7 +10,7 @@ import {
   setDoc,
   serverTimestamp,
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../db';
 
 function mapForum(snap) {
   return { id: snap.id, ...snap.data() };

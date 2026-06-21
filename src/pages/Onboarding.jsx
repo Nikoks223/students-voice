@@ -1,7 +1,7 @@
 ﻿import { useState, useMemo } from 'react';
 import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { doc, setDoc, serverTimestamp, runTransaction, increment } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { db } from '../lib/db';
 import { useAuth } from '../context/AuthContext';
 import { getSchoolsByCity, getSchoolById } from '../data/schools';
 import { checkAndIncrement } from '../lib/firestore/rateLimit';
@@ -97,7 +97,7 @@ export default function Onboarding() {
           }
 
           // Atomically free the orphaned lock so the set() below can claim it.
-          // Requires the extended delete rule on usernames/ — see security rules
+          // Requires the extended delete rule on usernames/ � see security rules
           // note in the codebase comments.
           transaction.delete(usernameRef);
         }
@@ -150,11 +150,11 @@ export default function Onboarding() {
       navigate('/');
     } catch (err) {
       if (err?.code) {
-        // Firestore/Firebase technical error — log real details, show friendly message.
+        // Firestore/Firebase technical error � log real details, show friendly message.
         console.error('[Onboarding] Transaction error:', err.code, err.message);
         setError('Грешка при регистрација. Обиди се повторно.');
       } else {
-        // Our own validation error (e.g. username taken) — message is already user-friendly.
+        // Our own validation error (e.g. username taken) � message is already user-friendly.
         setError(err.message || 'Грешка. Обиди се повторно.');
       }
       setLoading(false);
@@ -196,7 +196,7 @@ export default function Onboarding() {
               className="input"
               maxLength={20}
             />
-            <p className="text-xs text-muted mt-1.5">3–20 карактери. Само латиница, бројки и _</p>
+            <p className="text-xs text-muted mt-1.5">3�20 карактери. Само латиница, бројки и _</p>
           </div>
 
           {/* School */}
@@ -210,7 +210,7 @@ export default function Onboarding() {
               onChange={(e) => setSchoolId(e.target.value)}
               className="input"
             >
-              <option value="">— Избери училиште —</option>
+              <option value="">� Избери училиште �</option>
               {Object.entries(schoolsByCity).map(([city, schools]) => (
                 <optgroup key={city} label={city}>
                   {schools.map((s) => (

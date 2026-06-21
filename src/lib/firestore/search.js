@@ -1,5 +1,5 @@
-import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
-import { db } from '../firebase';
+﻿import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { db } from '../db';
 import { getForumById } from '../../data/forums';
 
 // Full-text search is not supported natively by Firestore.

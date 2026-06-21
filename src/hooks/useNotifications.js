@@ -1,11 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
-import {
-  subscribeToUnreadCount,
-  fetchNotifications,
-  markAsRead,
-  markAllAsRead,
-} from '../lib/firestore/notifications';
 
 export function useNotifications() {
   const { firebaseUser } = useAuth();
@@ -20,33 +14,39 @@ export function useNotifications() {
       setUnreadCount(0);
       return;
     }
-    const unsub = subscribeToUnreadCount(firebaseUser.uid, setUnreadCount);
-    return unsub;
+    let unsub;
+    import('../lib/firestore/notifications').then(({ subscribeToUnreadCount }) => {
+      unsub = subscribeToUnreadCount(firebaseUser.uid, setUnreadCount);
+    });
+    return () => unsub?.();
   }, [firebaseUser]);
 
   // Load full list when panel opens
   useEffect(() => {
     if (!open || !firebaseUser) return;
     setLoading(true);
-    fetchNotifications(firebaseUser.uid)
+    import('../lib/firestore/notifications')
+      .then(({ fetchNotifications }) => fetchNotifications(firebaseUser.uid))
       .then(setNotifications)
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [open, firebaseUser]);
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleOpen = useCallback(() => setOpen(true), []);
+  const handleClose = useCallback(() => setOpen(false), []);
 
   const handleMarkRead = async (id) => {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    const { markAsRead } = await import('../lib/firestore/notifications');
     await markAsRead(id).catch(() => {});
   };
 
-  const handleMarkAllRead = async () => {
+  const handleMarkAllRead = useCallback(async () => {
     if (!firebaseUser) return;
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    const { markAllAsRead } = await import('../lib/firestore/notifications');
     await markAllAsRead(firebaseUser.uid).catch(() => {});
-  };
+  }, [firebaseUser]);
 
   return {
     unreadCount,

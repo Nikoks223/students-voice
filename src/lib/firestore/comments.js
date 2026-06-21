@@ -1,4 +1,4 @@
-import {
+﻿import {
   collection,
   getDocs,
   getDoc,
@@ -8,7 +8,7 @@ import {
   increment,
   writeBatch,
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../db';
 import { invalidateLeaderboardCache } from './stats';
 import { createNotification } from './notifications';
 import { getForumFollowerIds, getThreadFollowerIds } from './follows';

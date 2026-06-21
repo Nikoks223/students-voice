@@ -268,7 +268,7 @@ export default function Home() {
       {/* ── Brand block ── */}
       <div className="flex items-center justify-between gap-4 pb-1">
         <div className="flex items-center gap-3.5 min-w-0">
-          <img src="/logo.png" alt="Средношколски Глас" className="w-12 h-12 shrink-0 object-contain" />
+          <img src="/logo.webp" alt="Средношколски Глас" className="w-12 h-12 shrink-0 object-contain" width={48} height={48} fetchPriority="high" />
           <div className="min-w-0">
             <p className="font-display font-semibold text-[18px] text-ink leading-tight">
               Средношколски Глас

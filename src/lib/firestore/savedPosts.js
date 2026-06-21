@@ -1,4 +1,4 @@
-import {
+﻿import {
   collection,
   doc,
   getDoc,
@@ -14,7 +14,7 @@ import {
   documentId,
 } from 'firebase/firestore';
 // getDoc is used only by isSaved (initial load check), not by toggleSavedPost.
-import { db } from '../firebase';
+import { db } from '../db';
 
 function chunkArray(arr, size) {
   const out = [];

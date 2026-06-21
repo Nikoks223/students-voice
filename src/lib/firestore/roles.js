@@ -1,5 +1,5 @@
-import { collection, doc, getDoc, updateDoc, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../firebase';
+﻿import { collection, doc, getDoc, updateDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../db';
 
 async function getUserData(userId) {
   const ref = doc(db, 'users', userId);

@@ -1,4 +1,4 @@
-import {
+﻿import {
   collection,
   query,
   where,
@@ -13,7 +13,7 @@ import {
   onSnapshot,
   serverTimestamp,
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../db';
 
 export async function createNotification({ userId, type, ...payload }) {
   await addDoc(collection(db, 'notifications'), {

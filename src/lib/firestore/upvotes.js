@@ -1,4 +1,4 @@
-import {
+﻿import {
   doc,
   getDoc,
   getDocs,
@@ -11,7 +11,7 @@ import {
   where,
   documentId,
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../db';
 
 function upvoteDocId(userId, targetType, targetId) {
   return `${userId}_${targetType}_${targetId}`;

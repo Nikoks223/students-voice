@@ -1,4 +1,4 @@
-// NOTE: Requires a composite Firestore index:
+﻿// NOTE: Requires a composite Firestore index:
 //   Collection: reports  |  Fields: status ASC, createdAt DESC
 // Create at: Firebase Console → Firestore Database → Indexes → Add index.
 
@@ -16,7 +16,7 @@ import {
   serverTimestamp,
   increment,
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../db';
 import { checkAndIncrement } from './rateLimit';
 
 export async function createReport({

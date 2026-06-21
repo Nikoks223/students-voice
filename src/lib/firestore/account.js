@@ -1,4 +1,4 @@
-import {
+﻿import {
   collection,
   collectionGroup,
   query,
@@ -12,7 +12,7 @@ import {
   serverTimestamp,
   increment,
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../db';
 
 export const DELETED_AUTHOR_DISPLAY = '[избришан корисник]';
 

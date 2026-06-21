@@ -1,4 +1,4 @@
-import {
+﻿import {
   doc,
   getDoc,
   runTransaction,
@@ -8,7 +8,7 @@ import {
   where,
   getDocs,
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../db';
 
 export function generateOptionId(index) {
   return `opt_${index + 1}`;

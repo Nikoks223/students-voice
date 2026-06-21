@@ -3,16 +3,14 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 
-// ── Eager — common-path pages (no lazy penalty on first navigation) ──
-import Login from './pages/Login';
-import Onboarding from './pages/Onboarding';
-import Home from './pages/Home';
-import Forum from './pages/Forum';
-import Thread from './pages/Thread';
-import Search from './pages/Search';
-import RecentComments from './pages/RecentComments';
-
-// ── Lazy — heavy or rarely-visited pages ──
+// ── Lazy — all pages to reduce initial parse time on mobile ──
+const Login = lazy(() => import('./pages/Login'));
+const Onboarding = lazy(() => import('./pages/Onboarding'));
+const Home = lazy(() => import('./pages/Home'));
+const Forum = lazy(() => import('./pages/Forum'));
+const Thread = lazy(() => import('./pages/Thread'));
+const Search = lazy(() => import('./pages/Search'));
+const RecentComments = lazy(() => import('./pages/RecentComments'));
 const NewThread = lazy(() => import('./pages/NewThread'));
 const AdminShell = lazy(() => import('./components/admin/AdminShell'));
 const AdminOverview = lazy(() => import('./pages/admin/AdminOverview'));
@@ -53,22 +51,33 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* Auth — no layout */}
-        <Route path="/login" element={<Login />} />
+        <Route
+          path="/login"
+          element={
+            <Suspense fallback={null}>
+              <Login />
+            </Suspense>
+          }
+        />
         <Route
           path="/onboarding"
           element={
             <ProtectedRoute requireProfile={false}>
-              <Onboarding />
+              <Suspense fallback={null}>
+                <Onboarding />
+              </Suspense>
             </ProtectedRoute>
           }
         />
 
-        {/* App — with MainLayout, eager (common path) */}
+        {/* App — common-path pages */}
         <Route
           path="/"
           element={
             <MainLayout>
-              <Home />
+              <Suspense fallback={<PageShimmer />}>
+                <Home />
+              </Suspense>
             </MainLayout>
           }
         />
@@ -76,7 +85,9 @@ function App() {
           path="/p/:forumId/:threadId"
           element={
             <MainLayout>
-              <Thread />
+              <Suspense fallback={<PageShimmer />}>
+                <Thread />
+              </Suspense>
             </MainLayout>
           }
         />
@@ -84,7 +95,9 @@ function App() {
           path="/p/:forumId"
           element={
             <MainLayout>
-              <Forum />
+              <Suspense fallback={<PageShimmer />}>
+                <Forum />
+              </Suspense>
             </MainLayout>
           }
         />
@@ -92,7 +105,9 @@ function App() {
           path="/recent"
           element={
             <MainLayout>
-              <RecentComments />
+              <Suspense fallback={<PageShimmer />}>
+                <RecentComments />
+              </Suspense>
             </MainLayout>
           }
         />
@@ -100,12 +115,14 @@ function App() {
           path="/search"
           element={
             <MainLayout>
-              <Search />
+              <Suspense fallback={<PageShimmer />}>
+                <Search />
+              </Suspense>
             </MainLayout>
           }
         />
 
-        {/* App — lazy (rarely visited or heavy) */}
+        {/* App — rarely visited or heavy pages */}
         <Route
           path="/new"
           element={

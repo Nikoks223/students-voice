@@ -1,28 +1,52 @@
-import { createContext, useContext, useEffect, useState } from 'react';
-import { onAuthStateChanged, signInWithPopup, signOut as firebaseSignOut } from 'firebase/auth';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { auth, db, googleProvider, facebookProvider } from '../lib/firebase';
+import { createContext, useContext, useEffect, useState, useRef } from 'react';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [firebaseUser, setFirebaseUser] = useState(null); // Firebase Auth user
-  const [userProfile, setUserProfile] = useState(undefined); // undefined=not fetched, null=new user, {...}=has profile
+  const [firebaseUser, setFirebaseUser] = useState(null);
+  // undefined = auth not yet resolved, null = logged out, {...} = has profile
+  const [userProfile, setUserProfile] = useState(undefined);
   const [loading, setLoading] = useState(true);
+  const authRef = useRef(null);
+  const googleProviderRef = useRef(null);
+  const facebookProviderRef = useRef(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUserProfile(undefined);
-      setFirebaseUser(user);
+    let unsubscribe;
 
-      if (user) {
+    Promise.all([
+      import('../lib/firebase'),
+      import('firebase/auth'),
+    ]).then(([{ default: app }, { getAuth, onAuthStateChanged, GoogleAuthProvider, FacebookAuthProvider }]) => {
+      const auth = getAuth(app);
+      authRef.current = auth;
+      googleProviderRef.current = new GoogleAuthProvider();
+      facebookProviderRef.current = new FacebookAuthProvider();
+
+      unsubscribe = onAuthStateChanged(auth, async (user) => {
+        setFirebaseUser(user);
+
+        if (!user) {
+          setUserProfile(null);
+          setLoading(false);
+          return;
+        }
+
+        // Unblock the UI immediately — profile arrives shortly after
+        setLoading(false);
+
+        // Lazy-load Firestore bundle only after auth resolves
+        const [{ db }, { doc, getDoc, updateDoc }] = await Promise.all([
+          import('../lib/db'),
+          import('firebase/firestore'),
+        ]);
+
         const userRef = doc(db, 'users', user.uid);
         const userSnap = await getDoc(userRef);
 
         if (userSnap.exists()) {
           const data = userSnap.data();
           // Auto-lift expired temporary bans on profile load.
-          // Reset warningCount to 1 so the user keeps one strike but can re-offend twice more.
           if (data.isBanned && data.banUntil && data.banUntil.toMillis() < Date.now()) {
             await updateDoc(userRef, { isBanned: false, banUntil: null, warningCount: 1 });
             data.isBanned = false;
@@ -33,31 +57,26 @@ export function AuthProvider({ children }) {
         } else {
           setUserProfile(null);
         }
-      } else {
-        setUserProfile(null);
-      }
-
-      setLoading(false);
+      });
     });
 
-    return unsubscribe;
+    return () => unsubscribe?.();
   }, []);
 
-  // Најава со Google
   const signInWithGoogle = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
-      // onAuthStateChanged ќе се активира автоматски по успешна најава
+      const { signInWithPopup } = await import('firebase/auth');
+      await signInWithPopup(authRef.current, googleProviderRef.current);
     } catch (err) {
       console.error('Google sign-in грешка:', err);
       throw err;
     }
   };
 
-  // Најава со Facebook
   const signInWithFacebook = async () => {
     try {
-      await signInWithPopup(auth, facebookProvider);
+      const { signInWithPopup } = await import('firebase/auth');
+      await signInWithPopup(authRef.current, facebookProviderRef.current);
     } catch (err) {
       if (err?.code !== 'auth/popup-closed-by-user') {
         console.error('Facebook sign-in грешка:', err);
@@ -66,14 +85,17 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Одјава
   const signOut = async () => {
-    await firebaseSignOut(auth);
+    const { signOut: firebaseSignOut } = await import('firebase/auth');
+    await firebaseSignOut(authRef.current);
   };
 
-  // Помошна функција — освежи го профилот по onboarding
   const refreshUserProfile = async () => {
     if (!firebaseUser) return;
+    const [{ db }, { doc, getDoc }] = await Promise.all([
+      import('../lib/db'),
+      import('firebase/firestore'),
+    ]);
     const userRef = doc(db, 'users', firebaseUser.uid);
     const userSnap = await getDoc(userRef);
     if (userSnap.exists()) {
@@ -98,7 +120,6 @@ export function AuthProvider({ children }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// Custom hook за лесен пристап
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {

@@ -37,7 +37,7 @@ export default function Footer() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
           {/* Brand block */}
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="Средношколски Глас" style={{ height: 34, width: 'auto', flexShrink: 0 }} />
+            <img src="/logo.webp" alt="Средношколски Глас" width={34} height={34} style={{ height: 34, width: 'auto', flexShrink: 0 }} />
             <div>
               <p
                 style={{

@@ -4,9 +4,12 @@ import { useAuth } from '../context/AuthContext';
 // adminOnly = true → само админ има пристап
 // requireProfile = true → корисникот мора да има завршено onboarding
 export default function ProtectedRoute({ children, adminOnly = false, requireProfile = true }) {
-  const { isAuthenticated, needsOnboarding, isAdmin, loading } = useAuth();
+  const { isAuthenticated, needsOnboarding, isAdmin, loading, userProfile } = useAuth();
 
-  if (loading) {
+  // For routes that need a profile, also wait until the profile fetch resolves
+  const profilePending = (requireProfile || adminOnly) && isAuthenticated && userProfile === undefined;
+
+  if (loading || profilePending) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-muted text-sm">Се вчитува...</div>

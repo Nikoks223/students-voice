@@ -12,7 +12,7 @@ import {
   getDocs,
   serverTimestamp,
 } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { db } from '../lib/db';
 import { useAuth } from '../context/AuthContext';
 import Avatar from '../components/Avatar';
 import SchoolBadge from '../components/SchoolBadge';
@@ -176,7 +176,7 @@ function BioModal({ current, onSave, onClose }) {
           rows={4}
           className="input w-full resize-none text-[13px]"
           style={{ borderRadius: 10, lineHeight: 1.65 }}
-          placeholder="Раскажи нешто за себе…"
+          placeholder="Раскажи нешто за себе�"
         />
         <p
           className="text-right font-mono mt-1.5"
@@ -189,7 +189,7 @@ function BioModal({ current, onSave, onClose }) {
             Откажи
           </Button>
           <Button variant="primary" loading={saving} disabled={saving} onClick={handleSave}>
-            {saving ? 'Зачувување…' : 'Зачувај'}
+            {saving ? 'Зачувување�' : 'Зачувај'}
           </Button>
         </div>
       </div>
@@ -256,7 +256,7 @@ export default function Profile() {
           const snap = await getDoc(doc(db, 'users', uidParam));
           if (snap.exists()) user = { id: snap.id, ...snap.data() };
         }
-        // Treat deleted accounts the same as not-found — the /u/:username path
+        // Treat deleted accounts the same as not-found � the /u/:username path
         // already returns null from fetchUserByUsername for deleted users; this
         // guard covers the /profile/:uid path which fetches by doc ID directly.
         if (!user || user.isDeleted) {
@@ -264,13 +264,13 @@ export default function Profile() {
           return;
         }
 
-        // ── Secondary reads — each is independent and non-fatal ─────────────
+        // ── Secondary reads � each is independent and non-fatal ─────────────
         let statsData = {};
         try {
           const statsSnap = await getDoc(doc(db, 'stats', 'users', 'entries', user.id));
           if (statsSnap.exists()) statsData = statsSnap.data();
         } catch {
-          // stats are display-only — missing or inaccessible stats don't break the profile
+          // stats are display-only � missing or inaccessible stats don't break the profile
         }
 
         let isFollowingUser = false;
@@ -279,7 +279,7 @@ export default function Profile() {
             isFollowingUser = await checkIsFollowing(currentUser.id, user.id);
           }
         } catch {
-          // non-fatal — follow button defaults to unfollowed
+          // non-fatal � follow button defaults to unfollowed
         }
 
         if (!cancelled) {
@@ -300,7 +300,7 @@ export default function Profile() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usernameParam, uidParam, currentUser?.id, isAuthenticated]);
 
-  // Moderation log — own profile only
+  // Moderation log � own profile only
   useEffect(() => {
     if (!profileUser || !currentUser || profileUser.id !== currentUser.id) return;
     if (!profileUser.warningCount && !profileUser.isBanned) return;
@@ -679,7 +679,7 @@ export default function Profile() {
               }}
             >
               {bannerUploading ? <Spinner /> : <IconCamera />}
-              {bannerUploading ? 'Прикачување…' : 'Промени банер'}
+              {bannerUploading ? 'Прикачување�' : 'Промени банер'}
             </button>
             <input
               ref={bannerInputRef}
@@ -836,7 +836,7 @@ export default function Profile() {
           ) : null}
         </div>
 
-        {/* ── Stats row — no card box, just hairlines ─────────────────────────── */}
+        {/* ── Stats row � no card box, just hairlines ─────────────────────────── */}
         <div
           className="grid grid-cols-4 mt-7"
           style={{
@@ -986,7 +986,7 @@ export default function Profile() {
                   marginBottom: 12,
                 }}
               >
-                Предупредувања · {profileUser.warningCount ?? 0}
+                Предупредувања � {profileUser.warningCount ?? 0}
               </p>
               {modLog.length === 0 ? (
                 <p style={{ fontSize: 12, color: 'var(--color-muted-dim)' }}>Нема записи.</p>
@@ -1049,7 +1049,7 @@ export default function Profile() {
           </div>
         )}
 
-        {/* ── Content tabs — underline style ──────────────────────────────────── */}
+        {/* ── Content tabs � underline style ──────────────────────────────────── */}
         <div
           className="mt-8"
           style={{ animation: 'fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) 180ms both' }}
@@ -1104,7 +1104,7 @@ export default function Profile() {
                 </div>
               ) : threads.length === 0 && threadsFetched ? (
                 <div className="text-center" style={{ paddingTop: 56, paddingBottom: 56 }}>
-                  <p style={{ fontSize: 13, color: 'var(--color-muted-dim)' }}>Сè уште нема објавени дискусии.</p>
+                  <p style={{ fontSize: 13, color: 'var(--color-muted-dim)' }}>С� уште нема објавени дискусии.</p>
                 </div>
               ) : (
                 <>
@@ -1121,7 +1121,7 @@ export default function Profile() {
                         disabled={threadLoading}
                         onClick={() => loadThreads({ append: true })}
                       >
-                        {threadLoading ? 'Вчитување…' : 'Вчитај повеќе'}
+                        {threadLoading ? 'Вчитување�' : 'Вчитај повеќе'}
                       </Button>
                     </div>
                   )}
@@ -1141,7 +1141,7 @@ export default function Profile() {
                 </div>
               ) : comments.length === 0 && commentsFetched ? (
                 <div className="text-center" style={{ paddingTop: 56, paddingBottom: 56 }}>
-                  <p style={{ fontSize: 13, color: 'var(--color-muted-dim)' }}>Сè уште нема коментари.</p>
+                  <p style={{ fontSize: 13, color: 'var(--color-muted-dim)' }}>С� уште нема коментари.</p>
                 </div>
               ) : (
                 <>
@@ -1201,7 +1201,7 @@ export default function Profile() {
                                 {forumName}
                               </span>
                               <span style={{ color: 'var(--color-muted-dimmer)', fontSize: 10, flexShrink: 0 }}>
-                                ·
+                                �
                               </span>
                               <span
                                 className="truncate max-w-[200px] sm:max-w-xs"
@@ -1262,7 +1262,7 @@ export default function Profile() {
                         disabled={commentLoading}
                         onClick={() => loadComments({ append: true })}
                       >
-                        {commentLoading ? 'Вчитување…' : 'Вчитај повеќе'}
+                        {commentLoading ? 'Вчитување�' : 'Вчитај повеќе'}
                       </Button>
                     </div>
                   )}

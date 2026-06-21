@@ -1,33 +1,14 @@
-import { forwardRef, createContext, useContext, useState } from 'react';
+import { forwardRef } from 'react';
 import * as RadixDialog from '@radix-ui/react-dialog';
-import { AnimatePresence, motion } from 'framer-motion';
 import clsx from 'clsx';
-
-// ── Internal open-state bridge ────────────────────────────────────────────────
-// Radix Dialog manages a11y/focus. We track open separately so AnimatePresence
-// (which lives inside the portal) can drive enter/exit animations correctly.
-const OpenCtx = createContext(false);
 
 // ── Root ─────────────────────────────────────────────────────────────────────
 
-export function Dialog({ open: openProp, onOpenChange, defaultOpen = false, children, ...props }) {
-  const [local, setLocal] = useState(defaultOpen);
-  const isControlled = openProp !== undefined;
-  const open = isControlled ? openProp : local;
-
+export function Dialog({ open, onOpenChange, defaultOpen = false, children, ...props }) {
   return (
-    <OpenCtx.Provider value={open}>
-      <RadixDialog.Root
-        open={open}
-        onOpenChange={(v) => {
-          if (!isControlled) setLocal(v);
-          onOpenChange?.(v);
-        }}
-        {...props}
-      >
-        {children}
-      </RadixDialog.Root>
-    </OpenCtx.Provider>
+    <RadixDialog.Root open={open} onOpenChange={onOpenChange} defaultOpen={defaultOpen} {...props}>
+      {children}
+    </RadixDialog.Root>
   );
 }
 
@@ -44,46 +25,30 @@ export const DialogContent = forwardRef(function DialogContent(
   { children, className, ...props },
   ref,
 ) {
-  const open = useContext(OpenCtx);
-
   return (
     <RadixDialog.Portal forceMount>
-      {/* Overlay — CSS transition driven by Radix data-state */}
       <RadixDialog.Overlay
         forceMount
         className={clsx(
           'fixed inset-0 z-40 bg-black/60 backdrop-blur-sm',
-          'transition-opacity duration-[200ms] ease-[cubic-bezier(0.16,1,0.3,1)]',
-          'data-[state=open]:opacity-100 data-[state=closed]:opacity-0',
-          'data-[state=closed]:pointer-events-none',
+          'transition-opacity duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]',
+          'data-[state=open]:opacity-100 data-[state=closed]:opacity-0 data-[state=closed]:pointer-events-none',
         )}
       />
-
-      {/* Shell — Radix manages focus trap & aria. Animation lives inside. */}
       <RadixDialog.Content
         ref={ref}
         forceMount
-        className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 outline-none"
+        className={clsx(
+          'fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 outline-none',
+          'bg-surface border border-border-strong rounded-2xl shadow-[var(--shadow-pop)] overscroll-contain',
+          'transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]',
+          'data-[state=open]:opacity-100 data-[state=open]:scale-100',
+          'data-[state=closed]:opacity-0 data-[state=closed]:scale-[0.96] data-[state=closed]:pointer-events-none',
+          className,
+        )}
         {...props}
       >
-        <AnimatePresence>
-          {open && (
-            <motion.div
-              key="dialog-inner"
-              className={clsx(
-                'bg-surface border border-border-strong rounded-2xl',
-                'shadow-[var(--shadow-pop)] overscroll-contain',
-                className,
-              )}
-              initial={{ opacity: 0, scale: 0.96, y: 8 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.97, y: 4 }}
-              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            >
-              {children}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {children}
       </RadixDialog.Content>
     </RadixDialog.Portal>
   );

@@ -1,5 +1,7 @@
-import SidebarContent from './SidebarContent';
+import { lazy, Suspense } from 'react';
 import Button from './ui/Button';
+
+const SidebarContent = lazy(() => import('./SidebarContent'));
 
 export default function MobileSidebar({ open, onClose }) {
   return (
@@ -22,7 +24,7 @@ export default function MobileSidebar({ open, onClose }) {
         {/* Header */}
         <div className="h-14 px-4 flex items-center justify-between border-b border-border shrink-0">
           <div className="flex items-center gap-2.5">
-            <img src="/logo.png" alt="Средношколски Глас" className="h-7 w-auto" />
+            <img src="/logo.webp" alt="Средношколски Глас" className="h-7 w-auto" width={28} height={28} />
           </div>
           <Button size="icon" variant="ghost" onClick={onClose} aria-label="Затвори мени">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -38,7 +40,11 @@ export default function MobileSidebar({ open, onClose }) {
 
         {/* Scrollable nav */}
         <div className="flex-1 overflow-y-auto px-2 pt-3">
-          <SidebarContent onLinkClick={onClose} />
+          {open && (
+            <Suspense fallback={null}>
+              <SidebarContent onLinkClick={onClose} />
+            </Suspense>
+          )}
         </div>
       </div>
     </>

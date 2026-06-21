@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { db } from '../lib/db';
 import { useAuth } from '../context/AuthContext';
 import Avatar from '../components/Avatar';
 import SchoolBadge from '../components/SchoolBadge';
@@ -230,7 +230,7 @@ export default function FollowersList() {
           ) : followers.length === 0 ? (
             <div className="p-10 text-center">
               <p className="text-[13px]" style={{ color: 'var(--color-muted-dim)' }}>
-                Сè уште нема следачи.
+                С� уште нема следачи.
               </p>
             </div>
           ) : (
@@ -249,7 +249,7 @@ export default function FollowersList() {
             disabled={loadingMore}
             onClick={loadMore}
           >
-            {loadingMore ? 'Вчитување…' : 'Вчитај повеќе'}
+            {loadingMore ? 'Вчитување�' : 'Вчитај повеќе'}
           </Button>
         </div>
       )}

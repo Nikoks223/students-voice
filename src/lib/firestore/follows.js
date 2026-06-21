@@ -1,4 +1,4 @@
-import {
+﻿import {
   collection,
   query,
   where,
@@ -9,7 +9,7 @@ import {
   deleteDoc,
   serverTimestamp,
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../db';
 
 // Deterministic doc ID: lets us use getDoc to check follow status in O(1)
 function followDocId(userId, forumId) {

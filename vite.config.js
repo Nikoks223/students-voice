@@ -10,6 +10,7 @@ export default defineConfig({
     },
   },
   build: {
+    target: 'es2020',
     chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
@@ -18,10 +19,12 @@ export default defineConfig({
             if (id.includes('firebase/firestore') || id.includes('@firebase/firestore')) return 'firebase-firestore';
             if (id.includes('firebase/auth')      || id.includes('@firebase/auth'))      return 'firebase-auth';
             if (id.includes('firebase')           || id.includes('@firebase'))           return 'firebase-core';
-            if (id.includes('@tiptap'))  return 'tiptap';
-            if (id.includes('react-router')) return 'router';
-            if (id.includes('react-dom'))    return 'react-dom';
-            if (id.includes('react'))        return 'react';
+            if (id.includes('framer-motion'))     return 'framer-motion';
+            if (id.includes('@radix-ui'))         return 'radix-ui';
+            if (id.includes('@tiptap') || id.includes('prosemirror')) return 'tiptap';
+            if (id.includes('react-router'))      return 'router';
+            if (id.includes('react-dom'))         return 'react-dom';
+            if (id.includes('react'))             return 'react';
           }
         },
       },

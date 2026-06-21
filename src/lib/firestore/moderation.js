@@ -1,4 +1,4 @@
-// NOTE: fetchUserModerationLog requires a composite Firestore index:
+﻿// NOTE: fetchUserModerationLog requires a composite Firestore index:
 //   Collection: moderationLog  |  Fields: targetUserId ASC, createdAt DESC
 
 import {
@@ -16,7 +16,7 @@ import {
   increment,
   Timestamp,
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../db';
 import { deleteThreadByModerator } from './threads';
 import { deleteCommentByModerator } from './comments';
 import { resolveReport } from './reports';

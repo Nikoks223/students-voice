@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import Avatar from './Avatar';
 import { useNotifications } from '../hooks/useNotifications';
 import { timeAgo } from '../utils/timeAgo';
@@ -547,6 +548,53 @@ function BellButton({ unreadCount, onClick }) {
   );
 }
 
+function SunIcon() {
+  return (
+    <svg style={{ width: 16, height: 16 }} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="5" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.75}
+        d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+      />
+    </svg>
+  );
+}
+
+function MoonIcon() {
+  return (
+    <svg style={{ width: 16, height: 16 }} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.75}
+        d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"
+      />
+    </svg>
+  );
+}
+
+function ThemeToggleButton() {
+  const { resolvedTheme, setTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
+  return (
+    <Button
+      size="icon"
+      variant="ghost"
+      onClick={() => setTheme(isDark ? 'light' : 'dark')}
+      aria-label={isDark ? 'Префрли на светла тема' : 'Префрли на темна тема'}
+    >
+      <span
+        key={resolvedTheme}
+        style={{ display: 'flex', animation: 'fadeUp 0.2s cubic-bezier(0.16,1,0.3,1) both' }}
+      >
+        {isDark ? <SunIcon /> : <MoonIcon />}
+      </span>
+    </Button>
+  );
+}
+
 export default function Header({ onMenuToggle }) {
   const navigate = useNavigate();
   const { isAuthenticated, userProfile, signOut, isAdmin } = useAuth();
@@ -659,11 +707,12 @@ export default function Header({ onMenuToggle }) {
           {/* Brand — desktop only */}
           <Link to="/" className="hidden lg:flex items-center gap-2 group">
             <img
-              src="/logo.png"
+              src="/logo.webp"
               alt="Средношколски Глас"
               className="h-8 w-auto shrink-0"
               width={32}
               height={32}
+              fetchPriority="high"
               style={{ transition: 'opacity 0.2s' }}
             />
             <span
@@ -854,9 +903,12 @@ export default function Header({ onMenuToggle }) {
               </div>
             </>
           ) : (
-            <Button variant="primary" onClick={() => navigate('/login')}>
-              Најави се
-            </Button>
+            <>
+              <ThemeToggleButton />
+              <Button variant="primary" onClick={() => navigate('/login')}>
+                Најави се
+              </Button>
+            </>
           )}
         </div>
       </div>

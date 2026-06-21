@@ -1,5 +1,5 @@
-import { collectionGroup, query, orderBy, limit, startAfter, getDocs } from 'firebase/firestore';
-import { db } from '../firebase';
+﻿import { collectionGroup, query, orderBy, limit, startAfter, getDocs } from 'firebase/firestore';
+import { db } from '../db';
 
 const PAGE_SIZE = 20;
 

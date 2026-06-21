@@ -1,4 +1,4 @@
-import {
+﻿import {
   collection,
   query,
   where,
@@ -12,7 +12,7 @@ import {
   serverTimestamp,
   writeBatch,
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../db';
 import { createNotification } from './notifications';
 import { checkAndIncrement } from './rateLimit';
 

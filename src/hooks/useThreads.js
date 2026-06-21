@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { collection, query, orderBy, limit, onSnapshot, where } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { db } from '../lib/db';
 
 export function useThreads({ forumId, limitCount = 20 } = {}) {
   const [threads, setThreads] = useState([]);

@@ -1,5 +1,5 @@
-import { doc, getDoc, runTransaction, increment, Timestamp } from 'firebase/firestore';
-import { db } from '../firebase';
+﻿import { doc, getDoc, runTransaction, increment, Timestamp } from 'firebase/firestore';
+import { db } from '../db';
 
 const RATE_LIMITING_ENABLED = true;
 

@@ -1,8 +1,8 @@
 ﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signInWithPopup } from 'firebase/auth';
+import { signInWithPopup, getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getApp } from 'firebase/app';
 import { useAuth } from '../context/AuthContext';
-import { auth, googleProvider } from '../lib/firebase';
 import { deleteAccount } from '../lib/firestore/account';
 import { Dialog, DialogContent, DialogClose } from './ui/Dialog';
 import Button from './ui/Button';
@@ -74,7 +74,8 @@ export default function DeleteAccountModal({ onClose }) {
     setReauthWorking(true);
     setError(null);
     try {
-      await signInWithPopup(auth, googleProvider);
+      const auth = getAuth(getApp());
+      await signInWithPopup(auth, new GoogleAuthProvider());
       await runDelete(auth.currentUser);
     } catch (err) {
       console.error('[DeleteAccountModal] Deletion error:', err, err.code, err.message);

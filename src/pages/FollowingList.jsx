@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { db } from '../lib/db';
 import { useAuth } from '../context/AuthContext';
 import Avatar from '../components/Avatar';
 import SchoolBadge from '../components/SchoolBadge';
@@ -249,7 +249,7 @@ export default function FollowingList() {
             disabled={loadingMore}
             onClick={loadMore}
           >
-            {loadingMore ? 'Вчитување…' : 'Вчитај повеќе'}
+            {loadingMore ? 'Вчитување�' : 'Вчитај повеќе'}
           </Button>
         </div>
       )}

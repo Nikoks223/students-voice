@@ -1,4 +1,4 @@
-import {
+﻿import {
   doc,
   getDoc,
   getDocs,
@@ -10,7 +10,7 @@ import {
   where,
   documentId,
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../db';
 import { REACTION_IDS } from '../reactions';
 
 function chunkArray(arr, size) {

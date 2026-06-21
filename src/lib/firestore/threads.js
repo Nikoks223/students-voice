@@ -1,4 +1,4 @@
-import {
+﻿import {
   collection,
   query,
   where,
@@ -15,7 +15,7 @@ import {
   Timestamp,
   addDoc,
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../db';
 import { getForumById } from '../../data/forums';
 import { invalidateLeaderboardCache } from './stats';
 import { validatePoll, generateOptionId } from './polls';
