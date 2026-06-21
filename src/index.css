@@ -20,9 +20,9 @@
   /* Typography */
   --color-ink: #F7F5FB;
   --color-ink-dim: #A8A3B3;
-  --color-muted: #716B7E;
-  --color-muted-dim: #4E4959;
-  --color-muted-dimmer: #3E3A49;
+  --color-muted: #8F8A9D;
+  --color-muted-dim: #8B8598;
+  --color-muted-dimmer: #837E94;
 
   /* Accent (Iris) */
   --color-accent: #7C5CFF;
@@ -112,7 +112,7 @@
   --color-ink-dim: #2E2A48;
   --color-muted: #524E6A;
   --color-muted-dim: #6C6884;
-  --color-muted-dimmer: #86829C;
+  --color-muted-dimmer: #65617A;
 
   /* Accent (same primary, adjusted for light contrast) */
   --color-accent: #7C5CFF;
@@ -295,7 +295,7 @@ html.switching-theme *::after {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    background-color: var(--color-accent);
+    background-color: var(--color-accent-deep);
     color: #ffffff;
     font-family: 'Geist', system-ui, sans-serif;
     font-weight: 500;
@@ -310,7 +310,7 @@ html.switching-theme *::after {
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
   }
   .btn-primary:hover {
-    background-color: var(--color-accent-deep);
+    background-color: var(--color-accent);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.16),
       0 2px 10px rgba(8, 6, 16, 0.35);
