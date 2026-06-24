@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect, forwardRef, useImperativeHandle, useCallback } from 'react';
+﻿import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useEditor, EditorContent } from '@tiptap/react';
@@ -549,8 +549,11 @@ export default function NewThread() {
       const res = await fetch(`/.netlify/functions/link-preview?url=${encodeURIComponent(url)}`);
       const data = await res.json();
       if (!data.error && (data.title || data.description)) setLinkPreview(data);
-    } catch {}
-    finally { setLinkPreviewLoading(false); }
+    } catch {
+      // Network/preview failure is non-critical — silently skip the preview.
+    } finally {
+      setLinkPreviewLoading(false);
+    }
   };
 
   // File input refs

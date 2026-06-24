@@ -277,10 +277,53 @@ service cloud.firestore {
                 ]));
     }
 
-    // rateLimits — per-user sliding-window counters for app-layer throttling
+    // rateLimits — per-user sliding-window counters for app-layer throttling.
+    // Hardened so a client cannot reset/forge its own limit: windowStart must
+    // be the server time (request.time), count is monotonic within a window,
+    // and a fresh window is only allowed once the previous one has genuinely
+    // expired (measured against server time, with the window length fixed here
+    // rather than supplied by the client).
     match /rateLimits/{userId} {
       match /actions/{action} {
-        allow read, create, update: if isSignedIn() && request.auth.uid == userId;
+        // Window length per action, in seconds. Must mirror the client call sites.
+        function windowSecondsFor(a) {
+          return a == 'suggestion' ? 86400
+               : a == 'onboarding' ? 86400
+               : 3600; // comment, thread, report, and any future hourly action
+        }
+        function onlyRateLimitFields() {
+          return request.resource.data.keys().hasOnly(['userId', 'action', 'count', 'windowStart'])
+                 && request.resource.data.userId == userId
+                 && request.resource.data.action == action;
+        }
+        // serverTimestamp() resolves to request.time, so this pins windowStart
+        // to server time and blocks client-forged timestamps.
+        function windowStartIsNow() {
+          return request.resource.data.windowStart == request.time;
+        }
+        function previousWindowExpired() {
+          return resource.data.windowStart < request.time - duration.value(windowSecondsFor(action), 's');
+        }
+
+        allow read: if isSignedIn() && request.auth.uid == userId;
+
+        allow create: if isSignedIn() && request.auth.uid == userId
+                      && onlyRateLimitFields()
+                      && request.resource.data.count == 1
+                      && windowStartIsNow();
+
+        allow update: if isSignedIn() && request.auth.uid == userId
+                      && onlyRateLimitFields()
+                      && (
+                        // (a) increment by exactly one within the same window
+                        (request.resource.data.windowStart == resource.data.windowStart
+                          && request.resource.data.count == resource.data.count + 1)
+                        // (b) start a fresh window only after the old one expired
+                        || (previousWindowExpired()
+                            && request.resource.data.count == 1
+                            && windowStartIsNow())
+                      );
+
         allow delete: if false;
       }
     }

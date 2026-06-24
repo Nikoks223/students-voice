@@ -39,6 +39,7 @@ import AttachmentDownloadConfirm from '../components/AttachmentDownloadConfirm';
 import { removeThreadAttachment, setThreadFeatured } from '../lib/firestore/threads';
 import LinkPreviewCard from '../components/LinkPreviewCard';
 import { fmt } from '../utils/format';
+import { sanitizeHtml } from '../lib/sanitizeHtml';
 
 const COMMENT_SORTS = [
   { key: 'best', label: 'Најдобри' },
@@ -387,12 +388,19 @@ function ThreadBodyEditor({ initialContent, onSave, onCancel, saving, attachment
 }
 
 function processBodyHtml(html) {
-  // Convert TipTap mention spans to clickable anchor tags
-  return html.replace(/<span[^>]*class="sg-mention"[^>]*>(@\w+)<\/span>/g, (match, text) => {
-    const m = match.match(/data-id="([^"]*)"/);
-    const username = m ? m[1] : text.slice(1).toLowerCase();
-    return `<a href="/u/${username}" class="sg-mention">${text}</a>`;
-  });
+  // Convert TipTap mention spans to clickable anchor tags...
+  const withMentions = html.replace(
+    /<span[^>]*class="sg-mention"[^>]*>(@\w+)<\/span>/g,
+    (match, text) => {
+      const m = match.match(/data-id="([^"]*)"/);
+      const username = m ? m[1] : text.slice(1).toLowerCase();
+      return `<a href="/u/${username}" class="sg-mention">${text}</a>`;
+    },
+  );
+  // ...then sanitise the result. User HTML is stored in Firestore and the
+  // security rules do not validate body content, so this is the only barrier
+  // against stored XSS.
+  return sanitizeHtml(withMentions);
 }
 
 function ThreadBodyDisplay({ body, isDeleted }) {
@@ -897,7 +905,9 @@ export default function Thread() {
       await navigator.clipboard.writeText(window.location.href);
       setShareToast(true);
       setTimeout(() => setShareToast(false), 2000);
-    } catch {}
+    } catch {
+      // Clipboard API unavailable or denied — sharing silently no-ops.
+    }
   };
 
   const featuredMenuItem = isAdmin

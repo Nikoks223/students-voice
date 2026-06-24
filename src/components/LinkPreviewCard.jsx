@@ -23,7 +23,9 @@ export default function LinkPreviewCard({ preview, loading, onDismiss }) {
   let domain = '';
   try {
     domain = new URL(preview.url).hostname.replace(/^www\./, '');
-  } catch {}
+  } catch {
+    // Malformed URL — leave domain empty.
+  }
 
   return (
     <div className="relative">

@@ -181,7 +181,7 @@ export default function DeleteAccountModal({ onClose }) {
               >
                 <p style={{ fontSize: 13, color: '#FCD34D', lineHeight: 1.6 }}>
                   Заради безбедност, треба повторно да се најавиш пред да ја избришеш сметката.
-                  Кликни „Повторна најава" и продолжи.
+                  Кликни „Повторна најава“ и продолжи.
                 </p>
               </div>
               {error && <p style={{ fontSize: 12, color: 'var(--color-coral)', marginBottom: 12 }}>{error}</p>}

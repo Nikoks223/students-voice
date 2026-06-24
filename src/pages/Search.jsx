@@ -469,7 +469,7 @@ export default function Search() {
             {results.length} резултат{results.length === 1 ? '' : 'и'}
           </span>
           <span className="text-[12px]" style={{ color: 'var(--color-muted-dim)' }}>
-            за „{query}"
+            за „{query}“
           </span>
         </div>
       )}

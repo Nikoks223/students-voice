@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useRef } from 'react';
+import { createContext, useContext, useEffect, useState, useRef, useMemo, useCallback } from 'react';
 
 const AuthContext = createContext(null);
 
@@ -63,7 +63,7 @@ export function AuthProvider({ children }) {
     return () => unsubscribe?.();
   }, []);
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = useCallback(async () => {
     try {
       const { signInWithPopup } = await import('firebase/auth');
       await signInWithPopup(authRef.current, googleProviderRef.current);
@@ -71,9 +71,9 @@ export function AuthProvider({ children }) {
       console.error('Google sign-in грешка:', err);
       throw err;
     }
-  };
+  }, []);
 
-  const signInWithFacebook = async () => {
+  const signInWithFacebook = useCallback(async () => {
     try {
       const { signInWithPopup } = await import('firebase/auth');
       await signInWithPopup(authRef.current, facebookProviderRef.current);
@@ -83,14 +83,14 @@ export function AuthProvider({ children }) {
       }
       throw err;
     }
-  };
+  }, []);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     const { signOut: firebaseSignOut } = await import('firebase/auth');
     await firebaseSignOut(authRef.current);
-  };
+  }, []);
 
-  const refreshUserProfile = async () => {
+  const refreshUserProfile = useCallback(async () => {
     if (!firebaseUser) return;
     const [{ db }, { doc, getDoc }] = await Promise.all([
       import('../lib/db'),
@@ -101,21 +101,24 @@ export function AuthProvider({ children }) {
     if (userSnap.exists()) {
       setUserProfile({ id: userSnap.id, ...userSnap.data() });
     }
-  };
+  }, [firebaseUser]);
 
-  const value = {
-    firebaseUser,
-    userProfile,
-    loading,
-    isAuthenticated: !!firebaseUser,
-    needsOnboarding: !!firebaseUser && (userProfile === null || userProfile?.isDeleted === true),
-    isAdmin: userProfile?.role === 'admin' || userProfile?.role === 'superadmin',
-    isSuperAdmin: userProfile?.role === 'superadmin',
-    signInWithGoogle,
-    signInWithFacebook,
-    signOut,
-    refreshUserProfile,
-  };
+  const value = useMemo(
+    () => ({
+      firebaseUser,
+      userProfile,
+      loading,
+      isAuthenticated: !!firebaseUser,
+      needsOnboarding: !!firebaseUser && (userProfile === null || userProfile?.isDeleted === true),
+      isAdmin: userProfile?.role === 'admin' || userProfile?.role === 'superadmin',
+      isSuperAdmin: userProfile?.role === 'superadmin',
+      signInWithGoogle,
+      signInWithFacebook,
+      signOut,
+      refreshUserProfile,
+    }),
+    [firebaseUser, userProfile, loading, signInWithGoogle, signInWithFacebook, signOut, refreshUserProfile],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

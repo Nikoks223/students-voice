@@ -26,7 +26,7 @@ function notifText(n) {
       return (
         <>
           Твојот предлог за форумот{' '}
-          <span style={{ color: 'var(--color-success)', fontWeight: 600 }}>„{n.forumName}"</span> е одобрен
+          <span style={{ color: 'var(--color-success)', fontWeight: 600 }}>„{n.forumName}“</span> е одобрен
         </>
       );
     case 'forum_comment':
@@ -56,7 +56,7 @@ function notifText(n) {
       return (
         <>
           <span style={{ color: 'var(--color-ink)', fontWeight: 600 }}>@{n.actorUsername}</span> објави нова
-          дискусија <span style={{ color: 'var(--color-ink-dim)' }}>„{n.threadTitle}"</span>
+          дискусија <span style={{ color: 'var(--color-ink-dim)' }}>„{n.threadTitle}“</span>
         </>
       );
     case 'upvote':

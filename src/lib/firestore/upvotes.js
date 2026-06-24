@@ -3,7 +3,7 @@
   getDoc,
   getDocs,
   addDoc,
-  writeBatch,
+  runTransaction,
   increment,
   serverTimestamp,
   collection,
@@ -25,7 +25,6 @@ function chunkArray(arr, size) {
 
 export async function toggleUpvote({ userId, targetType, targetId, threadId, actorUsername, forumId }) {
   const upvoteRef = doc(db, 'upvotes', upvoteDocId(userId, targetType, targetId));
-  const snap = await getDoc(upvoteRef);
 
   const targetRef =
     targetType === 'thread'
@@ -35,46 +34,40 @@ export async function toggleUpvote({ userId, targetType, targetId, threadId, act
   const today = new Date().toISOString().split('T')[0];
   const globalRef = doc(db, 'stats', 'global');
   const dailyRef = doc(db, 'stats', 'daily', 'entries', today);
-  const batch = writeBatch(db);
 
-  if (snap.exists()) {
-    batch.delete(upvoteRef);
-    batch.update(targetRef, { upvoteCount: increment(-1) });
-    batch.set(
-      globalRef,
-      { totalUpvotes: increment(-1), updatedAt: serverTimestamp() },
-      { merge: true },
-    );
-    batch.set(
-      dailyRef,
-      { date: today, newUpvotes: increment(-1), updatedAt: serverTimestamp() },
-      { merge: true },
-    );
-    await batch.commit();
-    return { voted: false };
-  } else {
-    batch.set(upvoteRef, { userId, targetType, targetId, threadId, createdAt: serverTimestamp() });
-    batch.update(targetRef, { upvoteCount: increment(1) });
-    batch.set(
-      globalRef,
-      { totalUpvotes: increment(1), updatedAt: serverTimestamp() },
-      { merge: true },
-    );
-    batch.set(
-      dailyRef,
-      { date: today, newUpvotes: increment(1), updatedAt: serverTimestamp() },
-      { merge: true },
-    );
-    await batch.commit();
+  // A transaction keeps the read of the upvote doc and the counter writes
+  // atomic, so rapid double-toggles can't double-count or drift the counter.
+  const voted = await runTransaction(db, async (txn) => {
+    const snap = await txn.get(upvoteRef);
+    const delta = snap.exists() ? -1 : 1;
 
-    // Fire-and-forget: notify the author (skip if upvoter is the author)
-    if (actorUsername) {
-      getDoc(targetRef).then(async (targetSnap) => {
+    if (snap.exists()) {
+      txn.delete(upvoteRef);
+    } else {
+      txn.set(upvoteRef, { userId, targetType, targetId, threadId, createdAt: serverTimestamp() });
+    }
+    txn.update(targetRef, { upvoteCount: increment(delta) });
+    txn.set(
+      globalRef,
+      { totalUpvotes: increment(delta), updatedAt: serverTimestamp() },
+      { merge: true },
+    );
+    txn.set(
+      dailyRef,
+      { date: today, newUpvotes: increment(delta), updatedAt: serverTimestamp() },
+      { merge: true },
+    );
+    return delta === 1;
+  });
+
+  // Fire-and-forget: notify the author (skip if upvoter is the author)
+  if (voted && actorUsername) {
+    getDoc(targetRef)
+      .then(async (targetSnap) => {
         if (!targetSnap.exists()) return;
         const authorId = targetSnap.data().authorId;
-        console.log('[upvote-notif] authorId:', authorId, 'userId:', userId, 'targetType:', targetType, 'threadId:', threadId);
         if (!authorId || authorId === userId) return;
-        const notifPayload = {
+        await addDoc(collection(db, 'notifications'), {
           userId: authorId,
           type: 'upvote',
           actorId: userId,
@@ -85,14 +78,12 @@ export async function toggleUpvote({ userId, targetType, targetId, threadId, act
           targetId,
           read: false,
           createdAt: serverTimestamp(),
-        };
-        console.log('[upvote-notif] PAYLOAD:', JSON.stringify(notifPayload, null, 2));
-        await addDoc(collection(db, 'notifications'), notifPayload);
-      }).catch((err) => { console.log('[upvote-notif] CAUGHT ERROR:', err?.code, err?.message, err); });
-    }
-
-    return { voted: true };
+        });
+      })
+      .catch(() => {});
   }
+
+  return { voted };
 }
 
 // One getDocs query per chunk of 30 instead of N individual getDoc calls.

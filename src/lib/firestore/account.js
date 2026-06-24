@@ -51,15 +51,12 @@ export async function deleteAccount(userId, firebaseUser) {
   const userRef = doc(db, 'users', userId);
   const userSnap = await getDoc(userRef);
   const usernameLower = userSnap.data()?.usernameLower ?? null;
-  console.log('[deleteAccount] Starting for userId:', userId, '| usernameLower:', usernameLower);
 
   // ── (a) Anonymize threads ─────────────────────────────────────────────────
   try {
-    console.log('[deleteAccount] Step (a) — анонимизирам threads...');
     const threadsSnap = await getDocs(
       query(collection(db, 'threads'), where('authorId', '==', userId)),
     );
-    console.log('[deleteAccount] Found', threadsSnap.size, 'threads to anonymize');
     for (const ch of chunk(threadsSnap.docs, CHUNK_SIZE)) {
       const batch = writeBatch(db);
       ch.forEach((d) =>
@@ -73,7 +70,6 @@ export async function deleteAccount(userId, firebaseUser) {
       );
       await batch.commit();
     }
-    console.log('[deleteAccount] Step (a) OK');
   } catch (err) {
     console.error('[deleteAccount] FAILED at step (a):', err, err.code, err.message);
     throw err;
@@ -81,11 +77,9 @@ export async function deleteAccount(userId, firebaseUser) {
 
   // ── (b) Anonymize comments (collectionGroup) ──────────────────────────────
   try {
-    console.log('[deleteAccount] Step (b) — анонимизирам comments (collectionGroup)...');
     const commentsSnap = await getDocs(
       query(collectionGroup(db, 'comments'), where('authorId', '==', userId)),
     );
-    console.log('[deleteAccount] Found', commentsSnap.size, 'comments to anonymize');
     for (const ch of chunk(commentsSnap.docs, CHUNK_SIZE)) {
       const batch = writeBatch(db);
       ch.forEach((d) =>
@@ -100,7 +94,6 @@ export async function deleteAccount(userId, firebaseUser) {
       );
       await batch.commit();
     }
-    console.log('[deleteAccount] Step (b) OK');
   } catch (err) {
     console.error('[deleteAccount] FAILED at step (b):', err, err.code, err.message);
     throw err;
@@ -109,11 +102,9 @@ export async function deleteAccount(userId, firebaseUser) {
   // ── (c) Delete upvotes + decrement counters ───────────────────────────────
   // Decrementing keeps counts accurate for remaining users.
   try {
-    console.log('[deleteAccount] Step (c) — бришам upvotes + декрементирам counters...');
     const upvotesSnap = await getDocs(
       query(collection(db, 'upvotes'), where('userId', '==', userId)),
     );
-    console.log('[deleteAccount] Found', upvotesSnap.size, 'upvotes to delete');
     for (const ch of chunk(upvotesSnap.docs, UPVOTE_CHUNK_SIZE)) {
       const batch = writeBatch(db);
       ch.forEach((d) => {
@@ -127,7 +118,6 @@ export async function deleteAccount(userId, firebaseUser) {
       });
       await batch.commit();
     }
-    console.log('[deleteAccount] Step (c) OK');
   } catch (err) {
     console.error('[deleteAccount] FAILED at step (c):', err, err.code, err.message);
     throw err;
@@ -135,19 +125,16 @@ export async function deleteAccount(userId, firebaseUser) {
 
   // ── (d) Delete follows + threadFollows ───────────────────────────────────
   try {
-    console.log('[deleteAccount] Step (d) — бришам follows...');
     const [followsSnap, threadFollowsSnap] = await Promise.all([
       getDocs(query(collection(db, 'follows'), where('userId', '==', userId))),
       getDocs(query(collection(db, 'threadFollows'), where('userId', '==', userId))),
     ]);
     const allFollowDocs = [...followsSnap.docs, ...threadFollowsSnap.docs];
-    console.log('[deleteAccount] Found', allFollowDocs.length, 'follows to delete');
     for (const ch of chunk(allFollowDocs, CHUNK_SIZE)) {
       const batch = writeBatch(db);
       ch.forEach((d) => batch.delete(d.ref));
       await batch.commit();
     }
-    console.log('[deleteAccount] Step (d) OK');
   } catch (err) {
     console.warn(
       '[deleteAccount] Step (d) follows cleanup skipped (non-critical):',
@@ -158,17 +145,14 @@ export async function deleteAccount(userId, firebaseUser) {
 
   // ── (d.5) Delete saved posts ──────────────────────────────────────────────
   try {
-    console.log('[deleteAccount] Step (d.5) — бришам savedPosts...');
     const savedSnap = await getDocs(
       query(collection(db, 'savedPosts'), where('userId', '==', userId)),
     );
-    console.log('[deleteAccount] Found', savedSnap.size, 'saved posts to delete');
     for (const ch of chunk(savedSnap.docs, CHUNK_SIZE)) {
       const batch = writeBatch(db);
       ch.forEach((d) => batch.delete(d.ref));
       await batch.commit();
     }
-    console.log('[deleteAccount] Step (d.5) OK');
   } catch (err) {
     console.warn(
       '[deleteAccount] Step (d.5) savedPosts cleanup skipped (non-critical):',
@@ -183,17 +167,14 @@ export async function deleteAccount(userId, firebaseUser) {
   // which is expensive at account-deletion time. The aggregate counts will be off by N
   // for deleted-user votes — acceptable for beta scale.
   try {
-    console.log('[deleteAccount] Step (d.55) — бришам pollVotes...');
     const pollVotesSnap = await getDocs(
       query(collection(db, 'pollVotes'), where('userId', '==', userId)),
     );
-    console.log('[deleteAccount] Found', pollVotesSnap.size, 'pollVotes to delete');
     for (const ch of chunk(pollVotesSnap.docs, CHUNK_SIZE)) {
       const batch = writeBatch(db);
       ch.forEach((d) => batch.delete(d.ref));
       await batch.commit();
     }
-    console.log('[deleteAccount] Step (d.55) OK');
   } catch (err) {
     console.warn(
       '[deleteAccount] Step (d.55) pollVotes cleanup skipped (non-critical):',
@@ -204,11 +185,9 @@ export async function deleteAccount(userId, firebaseUser) {
 
   // ── (d.6) Delete reactions + decrement target counters ───────────────────
   try {
-    console.log('[deleteAccount] Step (d.6) — бришам reactions + декрементирам counters...');
     const reactionsSnap = await getDocs(
       query(collection(db, 'reactions'), where('userId', '==', userId)),
     );
-    console.log('[deleteAccount] Found', reactionsSnap.size, 'reactions to delete');
     for (const ch of chunk(reactionsSnap.docs, UPVOTE_CHUNK_SIZE)) {
       const batch = writeBatch(db);
       ch.forEach((d) => {
@@ -222,7 +201,6 @@ export async function deleteAccount(userId, firebaseUser) {
       });
       await batch.commit();
     }
-    console.log('[deleteAccount] Step (d.6) OK');
   } catch (err) {
     console.warn(
       '[deleteAccount] Step (d.6) reactions cleanup skipped (non-critical):',
@@ -236,11 +214,9 @@ export async function deleteAccount(userId, firebaseUser) {
   // Requires updated security rules: reporter can update reporterId/reporterUsername
   // on their own report (see rules snippet). Soft-fail so rules update is not a blocker.
   try {
-    console.log('[deleteAccount] Step (e) — анонимизирам submitted reports...');
     const reportsSnap = await getDocs(
       query(collection(db, 'reports'), where('reporterId', '==', userId)),
     );
-    console.log('[deleteAccount] Found', reportsSnap.size, 'reports to anonymize');
     for (const ch of chunk(reportsSnap.docs, CHUNK_SIZE)) {
       const batch = writeBatch(db);
       ch.forEach((d) =>
@@ -251,7 +227,6 @@ export async function deleteAccount(userId, firebaseUser) {
       );
       await batch.commit();
     }
-    console.log('[deleteAccount] Step (e) OK');
   } catch (err) {
     console.warn(
       '[deleteAccount] Step (e) report anonymization skipped (check security rules):',
@@ -267,12 +242,8 @@ export async function deleteAccount(userId, firebaseUser) {
   // next time anyone tries to claim this username. Never throw — deletion must
   // continue regardless.
   try {
-    console.log('[deleteAccount] Step (f) — бришам username doc:', usernameLower);
     if (usernameLower) {
       await deleteDoc(doc(db, 'usernames', usernameLower));
-      console.log('[deleteAccount] Step (f) OK');
-    } else {
-      console.log('[deleteAccount] Step (f) skipped — no usernameLower on doc');
     }
   } catch (err) {
     console.warn(
@@ -291,7 +262,6 @@ export async function deleteAccount(userId, firebaseUser) {
   // that is the safety net that prevents a re-registered same-name account
   // from being shadowed by the old anonymised record.
   try {
-    console.log('[deleteAccount] Step (g) — soft-delete user doc...');
     await setDoc(userRef, {
       isDeleted: true,
       deletedAt: serverTimestamp(),
@@ -309,7 +279,6 @@ export async function deleteAccount(userId, firebaseUser) {
       banUntil: null,
       warningCount: 0,
     });
-    console.log('[deleteAccount] Step (g) OK');
   } catch (err) {
     console.error('[deleteAccount] FAILED at step (g):', err, err.code, err.message);
     throw err;
@@ -317,7 +286,6 @@ export async function deleteAccount(userId, firebaseUser) {
 
   // ── (g.5) Decrement aggregate stats (best-effort, never blocks deletion) ──
   try {
-    console.log('[deleteAccount] Step (g.5) — stats decrement...');
     const userSchool = userSnap.data()?.school;
     const statBatch = writeBatch(db);
     statBatch.set(
@@ -333,7 +301,6 @@ export async function deleteAccount(userId, firebaseUser) {
       );
     }
     await statBatch.commit();
-    console.log('[deleteAccount] Step (g.5) OK');
   } catch (err) {
     console.warn('[deleteAccount] Step (g.5) stats decrement skipped:', err.code, err.message);
   }
@@ -343,9 +310,7 @@ export async function deleteAccount(userId, firebaseUser) {
   // The UI must catch that code, call signInWithPopup to re-authenticate,
   // then retry deleteAccount — Firestore steps above will be no-ops on retry.
   try {
-    console.log('[deleteAccount] Step (h) — бришам Firebase Auth record...');
     await firebaseUser.delete();
-    console.log('[deleteAccount] Step (h) OK — account fully deleted');
   } catch (err) {
     console.error('[deleteAccount] FAILED at step (h):', err, err.code, err.message);
     throw err;

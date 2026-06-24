@@ -1,4 +1,4 @@
-﻿import { doc, getDoc, runTransaction, increment, Timestamp } from 'firebase/firestore';
+﻿import { doc, getDoc, runTransaction, increment, serverTimestamp } from 'firebase/firestore';
 import { db } from '../db';
 
 const RATE_LIMITING_ENABLED = true;
@@ -30,8 +30,11 @@ export async function checkAndIncrement(userId, action, maxCount, windowSeconds)
     const now = Date.now();
     const windowMs = windowSeconds * 1000;
 
+    // windowStart is written with serverTimestamp() so the security rules can
+    // trust it (== request.time) and reject forged "expired" windows. This is
+    // what makes the limit tamper-resistant rather than purely advisory.
     if (!snap.exists()) {
-      txn.set(ref, { userId, action, count: 1, windowStart: Timestamp.fromMillis(now) });
+      txn.set(ref, { userId, action, count: 1, windowStart: serverTimestamp() });
       return;
     }
 
@@ -40,7 +43,7 @@ export async function checkAndIncrement(userId, action, maxCount, windowSeconds)
 
     if (now - windowStartMs > windowMs) {
       // Window expired — start a fresh one
-      txn.set(ref, { userId, action, count: 1, windowStart: Timestamp.fromMillis(now) });
+      txn.set(ref, { userId, action, count: 1, windowStart: serverTimestamp() });
       return;
     }
 

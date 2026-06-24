@@ -265,7 +265,7 @@ function ReportCard({ report, adminId, onResolved }) {
       {/* Reporter details */}
       {report.details && (
         <p style={{ fontSize: 12, color: 'var(--color-muted)', fontStyle: 'italic', margin: '0 0 11px' }}>
-          "{report.details}"
+          „{report.details}“
         </p>
       )}
 
