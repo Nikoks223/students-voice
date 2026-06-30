@@ -1,6 +1,8 @@
 ﻿import { useState, useEffect, useMemo, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { searchThreads } from '../lib/firestore/search';
+import { searchUsernames } from '../lib/firestore/users';
+import Avatar from '../components/Avatar';
 import { timeAgo } from '../utils/timeAgo';
 import { transliterateQuery } from '../lib/transliterate';
 
@@ -330,6 +332,192 @@ function EmptyState({ hasQuery, query }) {
   );
 }
 
+// ── Mode toggle (Threads ⇄ Users) ───────────────────────────────────────────
+function ModeToggle({ mode, onChange }) {
+  const TABS = [
+    {
+      key: 'threads',
+      label: 'Дискусии',
+      icon: 'M4 6h16M4 12h16M4 18h10',
+    },
+    {
+      key: 'users',
+      label: 'Корисници',
+      icon: 'M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4zm6 0a4 4 0 00-1.5-3.12',
+    },
+  ];
+  return (
+    <div
+      className="grid grid-cols-2 gap-[3px] p-[3px] rounded-xl"
+      style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
+      role="tablist"
+      aria-label="Тип на пребарување"
+    >
+      {TABS.map(({ key, label, icon }) => {
+        const active = mode === key;
+        return (
+          <button
+            key={key}
+            role="tab"
+            aria-selected={active}
+            onClick={() => onChange(key)}
+            className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-[13px] font-semibold"
+            style={{
+              ...(active
+                ? {
+                    background: 'var(--color-surface-2)',
+                    color: 'var(--color-ink)',
+                    boxShadow: 'var(--shadow-card)',
+                  }
+                : { color: 'var(--color-muted)' }),
+              transition: 'background 0.18s cubic-bezier(0.23,1,0.32,1), color 0.18s',
+            }}
+            onMouseEnter={(e) => {
+              if (!active) e.currentTarget.style.color = 'var(--color-ink-dim)';
+            }}
+            onMouseLeave={(e) => {
+              if (!active) e.currentTarget.style.color = 'var(--color-muted)';
+            }}
+          >
+            <svg
+              className="w-3.5 h-3.5 shrink-0"
+              style={active ? { color: 'var(--color-accent)' } : undefined}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon} />
+            </svg>
+            {label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function UserCard({ user, query }) {
+  const cardRef = useRef(null);
+
+  const onMouseMove = (e) => {
+    if (!cardRef.current) return;
+    const r = cardRef.current.getBoundingClientRect();
+    cardRef.current.style.setProperty('--mx', `${e.clientX - r.left}px`);
+    cardRef.current.style.setProperty('--my', `${e.clientY - r.top}px`);
+  };
+  const onMouseLeave = () => {
+    cardRef.current?.style.setProperty('--mx', '-999px');
+    cardRef.current?.style.setProperty('--my', '-999px');
+  };
+
+  return (
+    <Link
+      to={`/u/${user.username?.toLowerCase()}`}
+      ref={cardRef}
+      onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
+      className="flex items-center gap-3.5 rounded-2xl p-3.5"
+      style={{
+        background: 'var(--color-surface)',
+        border: '1px solid var(--color-border)',
+        boxShadow: 'var(--shadow-card)',
+        position: 'relative',
+        overflow: 'hidden',
+        textDecoration: 'none',
+        transition: 'border-color 0.18s',
+      }}
+      onMouseEnterCapture={(e) => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.11)')}
+      onMouseLeaveCapture={(e) => (e.currentTarget.style.borderColor = 'var(--color-border)')}
+    >
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background:
+            'radial-gradient(300px circle at var(--mx, -999px) var(--my, -999px), rgba(255,255,255,0.03), transparent 70%)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      <Avatar username={user.username} avatarUrl={user.avatarUrl ?? null} size="md" className="relative" />
+
+      <div className="relative min-w-0 flex-1">
+        <p className="font-display font-bold text-[14px] text-ink leading-snug truncate">
+          {highlight(user.username, query)}
+        </p>
+        <p className="text-[12px] truncate" style={{ color: 'var(--color-muted)' }}>
+          {user.school || 'Средношколец'}
+        </p>
+      </div>
+
+      <svg
+        className="relative w-4 h-4 shrink-0"
+        style={{ color: 'var(--color-muted-dim)' }}
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+      </svg>
+    </Link>
+  );
+}
+
+function UserCardSkeleton() {
+  return (
+    <div
+      className="flex items-center gap-3.5 rounded-2xl p-3.5"
+      style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
+    >
+      <div className="shimmer w-9 h-9 rounded-2xl shrink-0" />
+      <div className="flex-1">
+        <div className="shimmer h-3.5 w-1/3 rounded mb-1.5" />
+        <div className="shimmer h-3 w-1/4 rounded" />
+      </div>
+    </div>
+  );
+}
+
+function UserEmptyState({ hasQuery, query }) {
+  return (
+    <div
+      className="rounded-2xl p-12 flex flex-col items-center gap-3 text-center"
+      style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
+    >
+      <div
+        className="w-12 h-12 rounded-2xl flex items-center justify-center"
+        style={{ background: 'var(--color-surface-hover)', border: '1px solid var(--color-border)' }}
+      >
+        <svg
+          className="w-5 h-5"
+          style={{ color: 'var(--color-muted-dim)' }}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4zm6 0a4 4 0 00-1.5-3.12"
+          />
+        </svg>
+      </div>
+      <div>
+        <p className="font-display font-bold text-ink text-[15px]">
+          {hasQuery ? `Нема корисник „${query}"` : 'Најди корисник 👤'}
+        </p>
+        <p className="text-[13px] mt-1" style={{ color: 'var(--color-muted)' }}>
+          {hasQuery
+            ? 'Провери го корисничкото име и пробај повторно.'
+            : 'Внеси корисничко име за да најдеш друг средношколец.'}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function Search() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [relevance, setRelevance] = useState('recent');
@@ -339,10 +527,23 @@ export default function Search() {
   const [corpus, setCorpus] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // User search
+  const [userResults, setUserResults] = useState([]);
+  const [userLoading, setUserLoading] = useState(false);
+
   const query = searchParams.get('q') ?? '';
-  const setQuery = (val) => {
-    val ? setSearchParams({ q: val }) : setSearchParams({});
+  const mode = searchParams.get('type') === 'users' ? 'users' : 'threads';
+
+  const updateParams = (next) => {
+    const params = {};
+    if (next.q ?? query) params.q = next.q ?? query;
+    const nextMode = next.type ?? mode;
+    if (nextMode === 'users') params.type = 'users';
+    setSearchParams(params);
   };
+
+  const setQuery = (val) => updateParams({ q: val });
+  const setMode = (val) => updateParams({ type: val });
 
   useEffect(() => {
     setLoading(true);
@@ -352,6 +553,35 @@ export default function Search() {
       .catch(() => setCorpus([]))
       .finally(() => setLoading(false));
   }, []);
+
+  // Debounced username search (server-side prefix query)
+  useEffect(() => {
+    if (mode !== 'users') return;
+    const q = query.trim();
+    if (!q) {
+      setUserResults([]);
+      setUserLoading(false);
+      return;
+    }
+    setUserLoading(true);
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      searchUsernames(q, 20)
+        .then((users) => {
+          if (!cancelled) setUserResults(users);
+        })
+        .catch(() => {
+          if (!cancelled) setUserResults([]);
+        })
+        .finally(() => {
+          if (!cancelled) setUserLoading(false);
+        });
+    }, 220);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [query, mode]);
 
   const results = useMemo(
     () => filterAndSort(corpus, query, relevance, timeFilter),
@@ -398,6 +628,9 @@ export default function Search() {
 
       <div aria-hidden style={{ height: 1, background: 'var(--color-surface-hover)' }} />
 
+      {/* ── Mode toggle: Threads ⇄ Users ── */}
+      <ModeToggle mode={mode} onChange={setMode} />
+
       {/* ── Search input ── */}
       <div className="relative">
         <svg
@@ -418,7 +651,11 @@ export default function Search() {
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Пребарај дискусии... (латиница и кирилица)"
+          placeholder={
+            mode === 'users'
+              ? 'Пребарај корисник по корисничко име...'
+              : 'Пребарај дискусии... (латиница и кирилица)'
+          }
           // eslint-disable-next-line jsx-a11y/no-autofocus -- intentional focus management: search input autofocuses on the dedicated search page
           autoFocus
           className="w-full pl-11 pr-10 py-3.5 rounded-2xl text-[14px]"
@@ -454,41 +691,78 @@ export default function Search() {
         )}
       </div>
 
-      {/* ── Filters ── */}
-      <div className="overflow-x-auto no-scrollbar">
-        <div className="flex items-center gap-2 pb-0.5">
-          <FilterPills options={RELEVANCE_OPTIONS} value={relevance} onChange={setRelevance} />
-          <FilterPills options={TIME_OPTIONS} value={timeFilter} onChange={setTimeFilter} />
-        </div>
-      </div>
-
-      {/* ── Results count ── */}
-      {query && !loading && results.length > 0 && (
-        <div className="flex items-baseline gap-2">
-          <span className="text-[13px] font-semibold text-ink">
-            {results.length} резултат{results.length === 1 ? '' : 'и'}
-          </span>
-          <span className="text-[12px]" style={{ color: 'var(--color-muted-dim)' }}>
-            за „{query}“
-          </span>
+      {/* ── Filters (threads only) ── */}
+      {mode === 'threads' && (
+        <div className="overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-2 pb-0.5">
+            <FilterPills options={RELEVANCE_OPTIONS} value={relevance} onChange={setRelevance} />
+            <FilterPills options={TIME_OPTIONS} value={timeFilter} onChange={setTimeFilter} />
+          </div>
         </div>
       )}
 
-      {/* ── Results ── */}
-      {loading ? (
-        <div className="space-y-2">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <SearchCardSkeleton key={i} />
-          ))}
-        </div>
-      ) : !query || results.length === 0 ? (
-        <EmptyState hasQuery={!!query} query={query} />
+      {mode === 'users' ? (
+        <>
+          {/* ── User results count ── */}
+          {query && !userLoading && userResults.length > 0 && (
+            <div className="flex items-baseline gap-2">
+              <span className="text-[13px] font-semibold text-ink">
+                {userResults.length} корисник{userResults.length === 1 ? '' : 'и'}
+              </span>
+              <span className="text-[12px]" style={{ color: 'var(--color-muted-dim)' }}>
+                за „{query}“
+              </span>
+            </div>
+          )}
+
+          {/* ── User results ── */}
+          {userLoading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <UserCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : !query || userResults.length === 0 ? (
+            <UserEmptyState hasQuery={!!query} query={query} />
+          ) : (
+            <div className="space-y-2">
+              {userResults.map((u) => (
+                <UserCard key={u.id} user={u} query={query} />
+              ))}
+            </div>
+          )}
+        </>
       ) : (
-        <div className="space-y-2">
-          {results.map((t) => (
-            <SearchCard key={t.id} thread={t} query={query} />
-          ))}
-        </div>
+        <>
+          {/* ── Results count ── */}
+          {query && !loading && results.length > 0 && (
+            <div className="flex items-baseline gap-2">
+              <span className="text-[13px] font-semibold text-ink">
+                {results.length} резултат{results.length === 1 ? '' : 'и'}
+              </span>
+              <span className="text-[12px]" style={{ color: 'var(--color-muted-dim)' }}>
+                за „{query}“
+              </span>
+            </div>
+          )}
+
+          {/* ── Results ── */}
+          {loading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <SearchCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : !query || results.length === 0 ? (
+            <EmptyState hasQuery={!!query} query={query} />
+          ) : (
+            <div className="space-y-2">
+              {results.map((t) => (
+                <SearchCard key={t.id} thread={t} query={query} />
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

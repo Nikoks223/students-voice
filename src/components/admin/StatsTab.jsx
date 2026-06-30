@@ -346,164 +346,6 @@ function ActivityChart({ daily }) {
   );
 }
 
-// ── School comparison table ────────────────────────────────────────────────────
-
-const SORT_COLS = [
-  { key: 'userCount', label: 'Корисници' },
-  { key: 'threadCount', label: 'Дискусии' },
-  { key: 'commentCount', label: 'Коментари' },
-  { key: 'score', label: 'Скор' },
-];
-
-function SchoolTable({ schools }) {
-  const [sortKey, setSortKey] = useState('userCount');
-  const [sortDir, setSortDir] = useState(-1); // -1=desc, 1=asc
-
-  const toggle = (key) => {
-    if (key === sortKey) setSortDir((d) => d * -1);
-    else {
-      setSortKey(key);
-      setSortDir(-1);
-    }
-  };
-
-  const rows = [...(schools ?? [])]
-    .map((s) => ({
-      ...s,
-      score: (s.threadCount ?? 0) + (s.commentCount ?? 0) * 0.5,
-    }))
-    .sort((a, b) => sortDir * ((b[sortKey] ?? 0) - (a[sortKey] ?? 0)));
-
-  return (
-    <Card style={{ padding: '20px 24px', overflowX: 'auto' }}>
-      <p
-        style={{
-          fontSize: 11,
-          fontWeight: 700,
-          textTransform: 'uppercase',
-          letterSpacing: '0.12em',
-          color: 'var(--color-muted-dimmer)',
-          margin: '0 0 14px',
-        }}
-      >
-        По училиште
-      </p>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5 }}>
-        <thead>
-          <tr>
-            <th
-              style={{
-                textAlign: 'left',
-                padding: '5px 8px 8px 0',
-                color: 'var(--color-muted-dim)',
-                fontSize: 10.5,
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.08em',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              Училиште
-            </th>
-            <th
-              style={{
-                textAlign: 'left',
-                padding: '5px 8px 8px',
-                color: 'var(--color-muted-dim)',
-                fontSize: 10.5,
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.08em',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              Град
-            </th>
-            {SORT_COLS.map((col) => (
-              <th
-                key={col.key}
-                onClick={() => toggle(col.key)}
-                style={{
-                  textAlign: 'right',
-                  padding: '5px 0 8px 8px',
-                  color: sortKey === col.key ? 'var(--color-accent)' : 'var(--color-muted-dim)',
-                  fontSize: 10.5,
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.08em',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  userSelect: 'none',
-                }}
-              >
-                {col.label} {sortKey === col.key ? (sortDir === -1 ? '↓' : '↑') : ''}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((s, i) => (
-            <tr key={s.id ?? i} style={{ borderTop: '1px solid var(--color-border)' }}>
-              <td style={{ padding: '9px 8px 9px 0', color: 'var(--color-ink)', fontWeight: 500 }}>
-                {s.schoolName ?? s.id}
-              </td>
-              <td style={{ padding: '9px 8px', color: 'var(--color-muted)' }}>{s.city ?? '—'}</td>
-              <td
-                style={{
-                  padding: '9px 0 9px 8px',
-                  textAlign: 'right',
-                  color: 'var(--color-ink-dim)',
-                  fontFamily: 'monospace',
-                }}
-              >
-                {fmt(s.userCount)}
-              </td>
-              <td
-                style={{
-                  padding: '9px 0 9px 8px',
-                  textAlign: 'right',
-                  color: 'var(--color-ink-dim)',
-                  fontFamily: 'monospace',
-                }}
-              >
-                {fmt(s.threadCount)}
-              </td>
-              <td
-                style={{
-                  padding: '9px 0 9px 8px',
-                  textAlign: 'right',
-                  color: 'var(--color-ink-dim)',
-                  fontFamily: 'monospace',
-                }}
-              >
-                {fmt(s.commentCount)}
-              </td>
-              <td
-                style={{
-                  padding: '9px 0 9px 8px',
-                  textAlign: 'right',
-                  color: '#22D3EE',
-                  fontFamily: 'monospace',
-                  fontWeight: 600,
-                }}
-              >
-                {s.score.toFixed(0)}
-              </td>
-            </tr>
-          ))}
-          {!rows.length && (
-            <tr>
-              <td colSpan={6} style={{ textAlign: 'center', color: 'var(--color-muted-dimmer)', padding: '20px 0' }}>
-                Нема податоци. Изврши backfill за да ги пополниш.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </Card>
-  );
-}
-
 // ── Top forums ─────────────────────────────────────────────────────────────────
 
 function TopForums({ forums }) {
@@ -737,16 +579,15 @@ function TopContributors() {
 
 export default function StatsTab() {
   const { slots, load, refreshAll, ageMinutes } = useStatsCache();
-  const { global: g, daily: d, schools: sc, forums: fo } = slots;
+  const { global: g, daily: d, forums: fo } = slots;
 
   useEffect(() => {
     load('global');
     load('daily');
-    load('schools');
     load('forums');
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const isLoading = g.loading || d.loading || sc.loading || fo.loading;
+  const isLoading = g.loading || d.loading || fo.loading;
   const age = ageMinutes('global');
 
   return (
@@ -790,9 +631,6 @@ export default function StatsTab() {
 
       {/* Activity chart */}
       {d.loading && !d.data ? <Shimmer h={240} /> : <ActivityChart daily={d.data} />}
-
-      {/* School table */}
-      {sc.loading && !sc.data ? <Shimmer h={180} /> : <SchoolTable schools={sc.data} />}
 
       {/* Top forums */}
       {fo.loading && !fo.data ? <Shimmer h={200} /> : <TopForums forums={fo.data} />}

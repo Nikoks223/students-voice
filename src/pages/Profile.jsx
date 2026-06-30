@@ -148,48 +148,82 @@ function BioModal({ current, onSave, onClose }) {
       role="presentation"
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{
-        backdropFilter: 'blur(4px)',
-        WebkitBackdropFilter: 'blur(4px)',
+        background: 'var(--modal-scrim)',
+        backdropFilter: 'blur(2px)',
+        WebkitBackdropFilter: 'blur(2px)',
+        animation: 'scrimIn 0.18s ease both',
       }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div
-        className="w-full max-w-md rounded-2xl p-6"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Уреди bio"
+        className="relative w-full max-w-md overflow-hidden rounded-2xl"
         style={{
           background: 'var(--color-surface)',
           border: '1px solid var(--color-border-strong)',
           boxShadow: 'var(--shadow-pop)',
-          animation: 'fadeUp 0.22s cubic-bezier(0.16,1,0.3,1) both',
+          animation: 'fadeUp 0.24s cubic-bezier(0.16,1,0.3,1) both',
         }}
       >
-        <h3 className="font-display font-bold text-[15px] text-ink tracking-tight mb-4">
-          Уреди bio
-        </h3>
-        <textarea
-          // eslint-disable-next-line jsx-a11y/no-autofocus -- intentional focus management: bio textarea activates when edit panel opens
-          autoFocus
-          value={text}
-          onChange={(e) => setText(e.target.value.slice(0, 280))}
-          rows={4}
-          className="input w-full resize-none text-[13px]"
-          style={{ borderRadius: 10, lineHeight: 1.65 }}
-          placeholder="Раскажи нешто за себе…"
+        {/* Spotlight — top-anchored iris glow */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-32"
+          style={{
+            background:
+              'radial-gradient(120% 100% at 50% 0%, rgba(124,92,255,0.14) 0%, transparent 70%)',
+          }}
         />
-        <p
-          className="text-right font-mono mt-1.5"
-          style={{ fontSize: 11, color: text.length >= 260 ? 'var(--color-coral)' : 'var(--color-muted-dim)' }}
-        >
-          {text.length}/280
-        </p>
-        <div className="flex gap-2 mt-4 justify-end">
-          <Button variant="secondary" onClick={onClose}>
-            Откажи
-          </Button>
-          <Button variant="primary" loading={saving} disabled={saving} onClick={handleSave}>
-            {saving ? 'Зачувување…' : 'Зачувај'}
-          </Button>
+
+        <div className="relative p-6">
+          {/* Editorial masthead */}
+          <p
+            className="font-mono uppercase mb-1.5"
+            style={{ fontSize: 10, letterSpacing: '0.14em', color: 'var(--color-accent-bright)' }}
+          >
+            Профил
+          </p>
+          <div className="flex items-baseline justify-between mb-4">
+            <h3 className="font-display font-bold text-[17px] text-ink tracking-tight leading-none">
+              Уреди bio
+            </h3>
+          </div>
+
+          <textarea
+            // eslint-disable-next-line jsx-a11y/no-autofocus -- intentional focus management: bio textarea activates when edit panel opens
+            autoFocus
+            value={text}
+            onChange={(e) => setText(e.target.value.slice(0, 280))}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSave();
+            }}
+            rows={4}
+            className="input w-full resize-none text-[13px]"
+            style={{ borderRadius: 12, lineHeight: 1.65 }}
+            placeholder="Раскажи нешто за себе…"
+          />
+          <p
+            className="text-right font-mono tabular-nums mt-1.5"
+            style={{
+              fontSize: 11,
+              color: text.length >= 260 ? 'var(--color-coral)' : 'var(--color-muted-dim)',
+            }}
+          >
+            {text.length}/280
+          </p>
+
+          <div className="flex gap-2 mt-5 justify-end">
+            <Button variant="secondary" onClick={onClose}>
+              Откажи
+            </Button>
+            <Button variant="primary" loading={saving} disabled={saving} onClick={handleSave}>
+              {saving ? 'Зачувување…' : 'Зачувај'}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

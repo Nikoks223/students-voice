@@ -53,11 +53,15 @@ export async function searchUsernames(prefix, max = 6) {
     limit(max),
   );
   const snap = await getDocs(q);
-  return snap.docs.map((d) => ({
-    id: d.id,
-    username: d.data().username ?? '',
-    school: d.data().school ?? '',
-  }));
+  return snap.docs
+    .map((d) => ({
+      id: d.id,
+      username: d.data().username ?? '',
+      school: d.data().school ?? '',
+      avatarUrl: d.data().avatarUrl ?? null,
+      isDeleted: d.data().isDeleted === true,
+    }))
+    .filter((u) => !u.isDeleted);
 }
 
 /**

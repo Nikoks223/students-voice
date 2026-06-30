@@ -2,12 +2,19 @@
 import { validatePoll } from '../lib/firestore/polls';
 
 function Toggle({ checked, onChange }) {
+  const [pressed, setPressed] = useState(false);
+  // Thumb elongates on press (iOS-style tactile feedback), then settles.
+  const thumbW = pressed ? 17 : 14;
+  const thumbLeft = checked ? 34 - thumbW - 2 : 2;
   return (
     <button
       type="button"
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
+      onPointerDown={() => setPressed(true)}
+      onPointerUp={() => setPressed(false)}
+      onPointerLeave={() => setPressed(false)}
       style={{
         position: 'relative',
         display: 'inline-flex',
@@ -15,10 +22,14 @@ function Toggle({ checked, onChange }) {
         width: 36,
         height: 20,
         borderRadius: 10,
-        background: checked ? 'var(--color-accent)' : 'rgba(255,255,255,0.1)',
-        border: 'none',
+        background: checked ? 'var(--color-accent)' : 'var(--color-surface-2)',
+        border: `1px solid ${checked ? 'rgba(124,92,255,0.45)' : 'var(--color-border-strong)'}`,
+        boxShadow: checked
+          ? 'inset 0 0 0 1px rgba(124,92,255,0.2)'
+          : 'inset 0 1px 2px rgba(0,0,0,0.18)',
         cursor: 'pointer',
-        transition: 'background 0.2s cubic-bezier(0.23,1,0.32,1)',
+        transition:
+          'background 0.22s cubic-bezier(0.23,1,0.32,1), border-color 0.22s, box-shadow 0.22s',
         flexShrink: 0,
         padding: 0,
       }}
@@ -26,13 +37,16 @@ function Toggle({ checked, onChange }) {
       <span
         style={{
           position: 'absolute',
-          left: checked ? 18 : 2,
-          width: 16,
-          height: 16,
-          borderRadius: '50%',
-          background: 'var(--color-ink)',
-          boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
-          transition: 'left 0.2s cubic-bezier(0.23,1,0.32,1)',
+          top: '50%',
+          left: thumbLeft,
+          width: thumbW,
+          height: 14,
+          borderRadius: 7,
+          background: '#FFFFFF',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.25), 0 0 0 0.5px rgba(0,0,0,0.04)',
+          transform: 'translateY(-50%)',
+          transition:
+            'left 0.22s cubic-bezier(0.23,1,0.32,1), width 0.18s cubic-bezier(0.23,1,0.32,1)',
         }}
       />
     </button>
@@ -48,24 +62,33 @@ function Checkbox({ checked, onChange, label }) {
         aria-checked={checked}
         onClick={() => onChange(!checked)}
         style={{
-          width: 16,
-          height: 16,
-          borderRadius: 4,
+          width: 18,
+          height: 18,
+          borderRadius: 5,
           flexShrink: 0,
-          border: `1px solid ${checked ? 'var(--color-accent)' : 'rgba(255,255,255,0.15)'}`,
-          background: checked ? 'var(--color-accent)' : 'transparent',
+          border: `1px solid ${checked ? 'var(--color-accent)' : 'var(--color-border-strong)'}`,
+          background: checked ? 'var(--color-accent)' : 'var(--color-bg-elevated)',
+          boxShadow: checked
+            ? '0 1px 4px rgba(124,92,255,0.3)'
+            : 'inset 0 1px 2px rgba(0,0,0,0.18)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           cursor: 'pointer',
-          transition: 'all 0.15s',
+          transition: 'all 0.15s cubic-bezier(0.23,1,0.32,1)',
           padding: 0,
+        }}
+        onMouseEnter={(e) => {
+          if (!checked) e.currentTarget.style.borderColor = 'rgba(124,92,255,0.45)';
+        }}
+        onMouseLeave={(e) => {
+          if (!checked) e.currentTarget.style.borderColor = 'var(--color-border-strong)';
         }}
       >
         {checked && (
           <svg
-            width="9"
-            height="9"
+            width="11"
+            height="11"
             viewBox="0 0 24 24"
             fill="none"
             stroke="white"
